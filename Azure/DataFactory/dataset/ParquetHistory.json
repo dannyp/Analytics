@@ -1,0 +1,33 @@
+{
+	"name": "ParquetHistory",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "MicksBlobStorage",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Environment": {
+				"type": "String",
+				"defaultValue": "@pipeline().parameters.Environment"
+			}
+		},
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "",
+				"folderPath": {
+					"value": "@concat(item().SourceSystem, '/', item().BlobFilename, '/History')",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().Environment",
+					"type": "Expression"
+				}
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

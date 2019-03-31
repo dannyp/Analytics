@@ -1,0 +1,30 @@
+{
+	"name": "ParquetFileHistory",
+	"properties": {
+		"description": "File in Parquet format",
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeGen2",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Environment": {
+				"type": "String"
+			}
+		},
+		"type": "AzureBlobFSFile",
+		"typeProperties": {
+			"format": {
+				"type": "ParquetFormat"
+			},
+			"fileName": {
+				"value": "@concat(item().BlobFilename, '_', variables('CurrentProcessDate'), '.parquet')",
+				"type": "Expression"
+			},
+			"folderPath": {
+				"value": "@concat('/', dataset().Environment, '/', item().SourceSystem, '/', item().BlobFilename, '/History')",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

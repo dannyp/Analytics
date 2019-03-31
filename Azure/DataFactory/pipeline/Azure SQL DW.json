@@ -1,0 +1,88 @@
+{
+	"name": "Azure SQL DW",
+	"properties": {
+		"description": "Process the Changeset in Azure SQL DW",
+		"activities": [
+			{
+				"name": "Get set to iterate over",
+				"description": "Get the entities to determine the Changeset for. This will use the Dependency Framework to ensure that the data has already been landed in Azure Blob storage. ",
+				"type": "Lookup",
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"source": {
+						"type": "SqlSource",
+						"sqlReaderStoredProcedureName": "[Process].[up_GetEntitiesToProcess]",
+						"storedProcedureParameters": {
+							"EntityGroupKeyCommaSeparatedString": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.EntityGroupKeyCommaSeparatedString",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					"dataset": {
+						"referenceName": "EntitiesToProcess",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Process Changeset",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get set to iterate over",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get set to iterate over').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Merge Staging into Table",
+							"type": "SqlServerStoredProcedure",
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"typeProperties": {
+								"storedProcedureName": {
+									"value": "@item().DatabaseMergeSproc",
+									"type": "Expression"
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "AzureSQLDWDatabase",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"EntityGroupKeyCommaSeparatedString": {
+				"type": "String",
+				"defaultValue": "2"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

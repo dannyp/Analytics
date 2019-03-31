@@ -1,0 +1,12 @@
+{
+	"name": "SourceTable",
+	"properties": {
+		"description": "The Source table.",
+		"linkedServiceName": {
+			"referenceName": "AdventureWorksDatabase",
+			"type": "LinkedServiceReference"
+		},
+		"type": "AzureSqlTable"
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
