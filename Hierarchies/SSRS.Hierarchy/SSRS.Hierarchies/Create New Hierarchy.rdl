@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2008/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <Body>
+    <ReportItems>
+          <Textbox Name="Textbox1">
+             <CanGrow>true</CanGrow>
+             <KeepTogether>true</KeepTogether>
+             <Paragraphs>
+                <Paragraph>
+                   <TextRuns>
+                      <TextRun>
+                         <Value>=Parameters!HierarchyName.Value</Value>
+                         <Style />
+                      </TextRun>
+                   </TextRuns>
+                   <Style />
+                </Paragraph>
+             </Paragraphs>
+             <rd:DefaultName>Textbox1</rd:DefaultName>
+             <Top>1.3cm</Top>
+             <Left>4.81224cm</Left>
+             <Height>0.6cm</Height>
+             <Width>8.70479cm</Width>
+             <Style>
+                <Border>
+                   <Style>None</Style>
+                </Border>
+                <PaddingLeft>2pt</PaddingLeft>
+                <PaddingRight>2pt</PaddingRight>
+                <PaddingTop>2pt</PaddingTop>
+                <PaddingBottom>2pt</PaddingBottom>
+             </Style>
+          </Textbox>
+          <Textbox Name="Textbox3">
+             <CanGrow>true</CanGrow>
+             <KeepTogether>true</KeepTogether>
+             <Paragraphs>
+                <Paragraph>
+                   <TextRuns>
+                      <TextRun>
+                         <Value>Create Hierarchy</Value>
+                         <Style>
+                            <TextDecoration>Underline</TextDecoration>
+                            <Color>Blue</Color>
+                         </Style>
+                      </TextRun>
+                   </TextRuns>
+                   <Style>
+                      <TextAlign>Right</TextAlign>
+                   </Style>
+                </Paragraph>
+             </Paragraphs>
+             <rd:DefaultName>Textbox3</rd:DefaultName>
+             <ActionInfo>
+                <Actions>
+                   <Action>
+                      <Drillthrough>
+                         <ReportName>Hierarchies</ReportName>
+                         <Parameters>
+                            <Parameter Name="HierarchyName">
+                               <Value>=Parameters!HierarchyName.Value</Value>
+                            </Parameter>
+                            <Parameter Name="HierarchyDescription">
+                               <Value>=Parameters!HierarchyDescription.Value</Value>
+                            </Parameter>
+                            <Parameter Name="Action">
+                               <Value>CREATE</Value>
+                            </Parameter>
+                         </Parameters>
+                      </Drillthrough>
+                   </Action>
+                </Actions>
+             </ActionInfo>
+             <Top>3.00799cm</Top>
+             <Left>0.57658cm</Left>
+             <Height>0.6cm</Height>
+             <Width>4.45792cm</Width>
+             <ZIndex>1</ZIndex>
+             <Style>
+                <Border>
+                   <Style>None</Style>
+                </Border>
+                <PaddingLeft>2pt</PaddingLeft>
+                <PaddingRight>2pt</PaddingRight>
+                <PaddingTop>2pt</PaddingTop>
+                <PaddingBottom>2pt</PaddingBottom>
+             </Style>
+          </Textbox>
+          <Textbox Name="Textbox5">
+             <CanGrow>true</CanGrow>
+             <KeepTogether>true</KeepTogether>
+             <Paragraphs>
+                <Paragraph>
+                   <TextRuns>
+                      <TextRun>
+                         <Value>Hierarchy Name:</Value>
+                         <Style>
+                            <FontWeight>Bold</FontWeight>
+                         </Style>
+                      </TextRun>
+                   </TextRuns>
+                   <Style>
+                      <TextAlign>Right</TextAlign>
+                   </Style>
+                </Paragraph>
+             </Paragraphs>
+             <rd:DefaultName>Textbox5</rd:DefaultName>
+             <Top>1.3cm</Top>
+             <Left>0.5cm</Left>
+             <Height>0.6cm</Height>
+             <Width>4.30975cm</Width>
+             <ZIndex>2</ZIndex>
+             <Style>
+                <Border>
+                   <Style>None</Style>
+                </Border>
+                <PaddingLeft>2pt</PaddingLeft>
+                <PaddingRight>2pt</PaddingRight>
+                <PaddingTop>2pt</PaddingTop>
+                <PaddingBottom>2pt</PaddingBottom>
+             </Style>
+          </Textbox>
+          <Textbox Name="Textbox6">
+             <CanGrow>true</CanGrow>
+             <KeepTogether>true</KeepTogether>
+             <Paragraphs>
+                <Paragraph>
+                   <TextRuns>
+                      <TextRun>
+                         <Value>Hierarchy Description:</Value>
+                         <Style>
+                            <FontWeight>Bold</FontWeight>
+                         </Style>
+                      </TextRun>
+                   </TextRuns>
+                   <Style>
+                      <TextAlign>Right</TextAlign>
+                   </Style>
+                </Paragraph>
+             </Paragraphs>
+             <rd:DefaultName>Textbox5</rd:DefaultName>
+             <Top>1.91851cm</Top>
+             <Left>0.5cm</Left>
+             <Height>0.6cm</Height>
+             <Width>4.30975cm</Width>
+             <ZIndex>3</ZIndex>
+             <Style>
+                <Border>
+                   <Style>None</Style>
+                </Border>
+                <PaddingLeft>2pt</PaddingLeft>
+                <PaddingRight>2pt</PaddingRight>
+                <PaddingTop>2pt</PaddingTop>
+                <PaddingBottom>2pt</PaddingBottom>
+             </Style>
+          </Textbox>
+          <Textbox Name="Textbox2">
+             <CanGrow>true</CanGrow>
+             <KeepTogether>true</KeepTogether>
+             <Paragraphs>
+                <Paragraph>
+                   <TextRuns>
+                      <TextRun>
+                         <Label>HierarchyDescription</Label>
+                         <Value>=iif(Parameters!HierarchyDescription.Value Is Nothing, "&lt;NULL&gt;", Parameters!HierarchyDescription.Value)</Value>
+                         <Style />
+                      </TextRun>
+                   </TextRuns>
+                   <Style />
+                </Paragraph>
+             </Paragraphs>
+             <rd:DefaultName>Textbox1</rd:DefaultName>
+             <Top>1.91851cm</Top>
+             <Left>4.80975cm</Left>
+             <Height>0.6cm</Height>
+             <Width>8.70479cm</Width>
+             <ZIndex>4</ZIndex>
+             <Style>
+                <Border>
+                   <Style>None</Style>
+                </Border>
+                <PaddingLeft>2pt</PaddingLeft>
+                <PaddingRight>2pt</PaddingRight>
+                <PaddingTop>2pt</PaddingTop>
+                <PaddingBottom>2pt</PaddingBottom>
+             </Style>
+          </Textbox>
+          <Textbox Name="Textbox22">
+             <CanGrow>true</CanGrow>
+             <KeepTogether>true</KeepTogether>
+             <Paragraphs>
+                <Paragraph>
+                   <TextRuns>
+                      <TextRun>
+                         <Label>ReportName</Label>
+                         <Value>=Globals!ReportName</Value>
+                         <Style>
+                            <FontSize>14pt</FontSize>
+                            <FontWeight>Bold</FontWeight>
+                         </Style>
+                      </TextRun>
+                   </TextRuns>
+                   <Style />
+                </Paragraph>
+             </Paragraphs>
+             <rd:DefaultName>Textbox22</rd:DefaultName>
+             <Height>0.70086cm</Height>
+             <Width>14.16687cm</Width>
+             <ZIndex>5</ZIndex>
+             <Style>
+                <Border>
+                   <Style>None</Style>
+                </Border>
+                <PaddingLeft>2pt</PaddingLeft>
+                <PaddingRight>2pt</PaddingRight>
+                <PaddingTop>2pt</PaddingTop>
+                <PaddingBottom>2pt</PaddingBottom>
+             </Style>
+          </Textbox>
+       </ReportItems>
+    <Height>2in</Height>
+    <Style />
+  </Body>
+  <Width>6.5in</Width>
+  <Page>
+    <PageHeight>29.7cm</PageHeight>
+    <PageWidth>21cm</PageWidth>
+    <LeftMargin>2cm</LeftMargin>
+    <RightMargin>2cm</RightMargin>
+    <TopMargin>2cm</TopMargin>
+    <BottomMargin>2cm</BottomMargin>
+    <ColumnSpacing>0.13cm</ColumnSpacing>
+    <Style />
+  </Page>
+  <AutoRefresh>0</AutoRefresh>
+   <ReportParameters>
+      <ReportParameter Name="HierarchyName">
+         <DataType>String</DataType>
+         <Prompt>Hierarchy Name:</Prompt>
+      </ReportParameter>
+      <ReportParameter Name="HierarchyDescription">
+         <DataType>String</DataType>
+         <Nullable>true</Nullable>
+         <DefaultValue>
+            <Values>
+               <Value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true" />
+            </Values>
+         </DefaultValue>
+         <Prompt>Hierarchy Description:</Prompt>
+      </ReportParameter>
+   </ReportParameters>
+   <rd:ReportUnitType>Cm</rd:ReportUnitType>
+  <rd:ReportID>206fa795-6969-4723-9951-361c705457da</rd:ReportID>
+</Report>

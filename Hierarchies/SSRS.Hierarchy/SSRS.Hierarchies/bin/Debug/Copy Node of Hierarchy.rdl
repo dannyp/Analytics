@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner" xmlns:cl="http://schemas.microsoft.com/sqlserver/reporting/2010/01/componentdefinition" xmlns="http://schemas.microsoft.com/sqlserver/reporting/2010/01/reportdefinition">
+  <AutoRefresh>0</AutoRefresh>
+  <DataSources>
+    <DataSource Name="HierarchyDataSource">
+      <DataSourceReference>HierarchyDataSource</DataSourceReference>
+      <rd:SecurityType>None</rd:SecurityType>
+      <rd:DataSourceID>2aab41a5-7055-461d-8bc7-44434a50d7e8</rd:DataSourceID>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="Hierarchy">
+      <Query>
+        <DataSourceName>HierarchyDataSource</DataSourceName>
+        <CommandType>StoredProcedure</CommandType>
+        <CommandText>Hierarchy.up_Hierarchies</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="Value">
+          <DataField>Value</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="Label">
+          <DataField>Label</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="FromHierarchyExploded">
+      <Query>
+        <DataSourceName>HierarchyDataSource</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@HierarchyKey">
+            <Value>=Parameters!HierarchyToCopyFrom.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandType>StoredProcedure</CommandType>
+        <CommandText>Hierarchy.up_Hierarchy</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="LogicalNode">
+          <DataField>LogicalNode</DataField>
+          <rd:UserDefined>true</rd:UserDefined>
+        </Field>
+        <Field Name="HierarchyLevel">
+          <DataField>HierarchyLevel</DataField>
+          <rd:UserDefined>true</rd:UserDefined>
+        </Field>
+        <Field Name="HierarchyNodeKey">
+          <DataField>HierarchyNodeKey</DataField>
+          <rd:UserDefined>true</rd:UserDefined>
+        </Field>
+        <Field Name="RoleName">
+          <DataField>RoleName</DataField>
+          <rd:UserDefined>true</rd:UserDefined>
+        </Field>
+        <Field Name="ParentHierarchyNodeKey">
+          <DataField>ParentHierarchyNodeKey</DataField>
+          <rd:UserDefined>true</rd:UserDefined>
+        </Field>
+        <Field Name="NodeDisplayName">
+          <DataField>NodeDisplayName</DataField>
+          <rd:UserDefined>true</rd:UserDefined>
+        </Field>
+        <Field Name="Amount">
+          <Value>=iif(Fields!RoleName.Value = "Branch", 1, 0)</Value>
+        </Field>
+        <Field Name="IndentedNodeDisplayName">
+          <Value>=Space(Fields!HierarchyLevel.Value * 5) &amp; Fields!NodeDisplayName.Value</Value>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="ToHierarchyExploded">
+      <Query>
+        <DataSourceName>HierarchyDataSource</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@HierarchyKey">
+            <Value>=Parameters!HierarchyToCopyTo.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandType>StoredProcedure</CommandType>
+        <CommandText>Hierarchy.up_Hierarchy</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="LogicalNode">
+          <DataField>LogicalNode</DataField>
+          <rd:UserDefined>true</rd:UserDefined>
+        </Field>
+        <Field Name="HierarchyLevel">
+          <DataField>HierarchyLevel</DataField>
+          <rd:UserDefined>true</rd:UserDefined>
+        </Field>
+        <Field Name="HierarchyNodeKey">
+          <DataField>HierarchyNodeKey</DataField>
+          <rd:UserDefined>true</rd:UserDefined>
+        </Field>
+        <Field Name="RoleName">
+          <DataField>RoleName</DataField>
+          <rd:UserDefined>true</rd:UserDefined>
+        </Field>
+        <Field Name="ParentHierarchyNodeKey">
+          <DataField>ParentHierarchyNodeKey</DataField>
+          <rd:UserDefined>true</rd:UserDefined>
+        </Field>
+        <Field Name="NodeDisplayName">
+          <DataField>NodeDisplayName</DataField>
+          <rd:UserDefined>true</rd:UserDefined>
+        </Field>
+        <Field Name="Amount">
+          <Value>=iif(Fields!RoleName.Value = "Branch", 1, 0)</Value>
+        </Field>
+        <Field Name="IndentedNodeDisplayName">
+          <Value>=Space(Fields!HierarchyLevel.Value * 5) &amp; Fields!NodeDisplayName.Value</Value>
+        </Field>
+        <Field Name="ParentNodeName">
+          <DataField>ParentNodeName</DataField>
+          <rd:UserDefined>true</rd:UserDefined>
+        </Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <ReportSections>
+    <ReportSection>
+      <Body>
+        <ReportItems>
+          <Tablix Name="Tablix1">
+            <TablixBody>
+              <TablixColumns>
+                <TablixColumn>
+                  <Width>8.90229cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>2.5cm</Width>
+                </TablixColumn>
+              </TablixColumns>
+              <TablixRows>
+                <TablixRow>
+                  <Height>0.6cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="NodeDisplayName">
+                          <CanGrow>true</CanGrow>
+                          <ToggleImage>
+                            <InitialState>=iif(Parameters!ExpandAll.Value = True, True, False)</InitialState>
+                          </ToggleImage>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!NodeDisplayName.Value</Value>
+                                  <Style>
+                                    <FontWeight>Normal</FontWeight>
+                                    <TextDecoration>Underline</TextDecoration>
+                                    <Color>Blue</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>NodeDisplayName</rd:DefaultName>
+                          <ActionInfo>
+                            <Actions>
+                              <Action>
+                                <Drillthrough>
+                                  <ReportName>Hierarchies</ReportName>
+                                  <Parameters>
+                                    <Parameter Name="HierarchyKey">
+                                      <Value>=Parameters!HierarchyToCopyFrom.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="Action">
+                                      <Value>="COPY"</Value>
+                                    </Parameter>
+                                    <Parameter Name="HierarchyNodeKey">
+                                      <Value>=Parameters!HierarchyNodeToCopy.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="Hierarchy">
+                                      <Value>=Parameters!HierarchyToCopyTo.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="ExpandAll">
+                                      <Value>True</Value>
+                                    </Parameter>
+                                    <Parameter Name="ActionMessage">
+                                      <Value>="Node '" &amp; Parameters!HierarchyNodeToCopy.Label &amp; "' (and all of its children) has been copied under parent '" &amp; Fields!NodeDisplayName.Value &amp; "' in Hierarchy '" &amp; Parameters!HierarchyToCopyTo.Label &amp; "'"</Value>
+                                    </Parameter>
+                                    <Parameter Name="DestinationParentHierarchyNodeKey">
+                                      <Value>=Fields!HierarchyNodeKey.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="DestinationHierarchyKey">
+                                      <Value>=Parameters!HierarchyToCopyTo.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="NodeName">
+                                      <Value>=Parameters!HierarchyNodeToCopy.Label</Value>
+                                    </Parameter>
+                                    <Parameter Name="DestinationParentNodeName">
+                                      <Value>=Fields!NodeDisplayName.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="NodeKey">
+                                      <Value>=Parameters!HierarchyNodeToCopy.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="HierarchyName">
+                                      <Value>=Parameters!HierarchyToCopyFrom.Label</Value>
+                                    </Parameter>
+                                    <Parameter Name="NodeNumberOfChildren">
+                                      <Value>=Parameters!NodeNumberOfChildren.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="NodeTypeName">
+                                      <Value>=Parameters!NodeTypeName.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="DestinationHierarchyName">
+                                      <Value>=Parameters!HierarchyToCopyTo.Label</Value>
+                                    </Parameter>
+                                  </Parameters>
+                                </Drillthrough>
+                              </Action>
+                            </Actions>
+                          </ActionInfo>
+                          <ToolTip>="Click to position node '" &amp; Parameters!HierarchyNodeToCopy.Label &amp; "' and all of its children under '" &amp; Fields!NodeDisplayName.Value &amp; "'"</ToolTip>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>=IIF(CountRows("Details", Recursive) &gt; 1, "WhiteSmoke", "Default")</BackgroundColor>
+                            <PaddingLeft>=CStr(iif(CountRows("Details", Recursive) &gt; 1, 2 + (Level() * 20), 12 + (Level() * 20))) + "pt"</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                        <rd:Selected>true</rd:Selected>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="RoleName">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Label>Title</Label>
+                                  <Value>=iif(Fields!HierarchyLevel.Value = 0, "Role", "")</Value>
+                                  <Style>
+                                    <FontStyle>Italic</FontStyle>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                                <TextRun>
+                                  <Value>=Fields!RoleName.Value</Value>
+                                  <Style />
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>RoleName</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>=IIF(CountRows("Details", Recursive) &gt; 1, "WhiteSmoke", "Default")</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+              </TablixRows>
+            </TablixBody>
+            <TablixColumnHierarchy>
+              <TablixMembers>
+                <TablixMember />
+                <TablixMember />
+              </TablixMembers>
+            </TablixColumnHierarchy>
+            <TablixRowHierarchy>
+              <TablixMembers>
+                <TablixMember>
+                  <Group Name="Details">
+                    <DocumentMapLabel>=Fields!NodeDisplayName.Value</DocumentMapLabel>
+                    <GroupExpressions>
+                      <GroupExpression>=Fields!HierarchyNodeKey.Value</GroupExpression>
+                    </GroupExpressions>
+                    <Parent>=Fields!ParentHierarchyNodeKey.Value</Parent>
+                  </Group>
+                  <Visibility>
+                    <Hidden>=iif(Parameters!ExpandAll.Value = True, False, True)</Hidden>
+                    <ToggleItem>NodeDisplayName</ToggleItem>
+                  </Visibility>
+                </TablixMember>
+              </TablixMembers>
+            </TablixRowHierarchy>
+            <DataSetName>ToHierarchyExploded</DataSetName>
+            <Top>1.33297cm</Top>
+            <Left>0.27781cm</Left>
+            <Height>0.6cm</Height>
+            <Width>11.40229cm</Width>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Tablix>
+          <Textbox Name="Textbox2">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>Choose a new Parent for '</Value>
+                    <Style>
+                      <FontStyle>Italic</FontStyle>
+                      <FontWeight>Bold</FontWeight>
+                      <Color>Maroon</Color>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Label>Hierarchy Node To Move</Label>
+                    <Value>=Parameters!HierarchyNodeToCopy.Label</Value>
+                    <Style>
+                      <FontStyle>Italic</FontStyle>
+                      <FontWeight>Bold</FontWeight>
+                      <Color>Maroon</Color>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Value>'       </Value>
+                    <Style>
+                      <FontStyle>Italic</FontStyle>
+                      <FontWeight>Bold</FontWeight>
+                      <Color>Maroon</Color>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Label>Cancel</Label>
+                    <Value>="Cancel"</Value>
+                    <ActionInfo>
+                      <Actions>
+                        <Action>
+                          <Hyperlink>="javascript: history.go(-1)"</Hyperlink>
+                        </Action>
+                      </Actions>
+                    </ActionInfo>
+                    <Style>
+                      <FontStyle>Italic</FontStyle>
+                      <FontWeight>Bold</FontWeight>
+                      <TextDecoration>Underline</TextDecoration>
+                      <Color>Blue</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox2</rd:DefaultName>
+            <Top>0.4863cm</Top>
+            <Left>0.27781cm</Left>
+            <Height>0.6cm</Height>
+            <Width>11.40229cm</Width>
+            <ZIndex>1</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+        </ReportItems>
+        <Height>0.89583in</Height>
+        <Style />
+      </Body>
+      <Width>4.81056in</Width>
+      <Page>
+        <PageHeight>29.7cm</PageHeight>
+        <PageWidth>21cm</PageWidth>
+        <InteractiveHeight>100cm</InteractiveHeight>
+        <InteractiveWidth>21cm</InteractiveWidth>
+        <LeftMargin>2cm</LeftMargin>
+        <RightMargin>2cm</RightMargin>
+        <TopMargin>2cm</TopMargin>
+        <BottomMargin>2cm</BottomMargin>
+        <ColumnSpacing>0.13cm</ColumnSpacing>
+        <Style />
+      </Page>
+    </ReportSection>
+  </ReportSections>
+  <ReportParameters>
+    <ReportParameter Name="NodeNumberOfChildren">
+      <DataType>Integer</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>NodeNumberOfChildren</Prompt>
+      <Hidden>true</Hidden>
+    </ReportParameter>
+    <ReportParameter Name="NodeTypeName">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <DefaultValue>
+        <Values>
+          <Value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true" />
+        </Values>
+      </DefaultValue>
+      <Prompt>NodeTypeName</Prompt>
+      <Hidden>true</Hidden>
+    </ReportParameter>
+    <ReportParameter Name="HierarchyToCopyFrom">
+      <DataType>Integer</DataType>
+      <Prompt>HierarchyToCopyFrom:</Prompt>
+      <Hidden>true</Hidden>
+      <ValidValues>
+        <DataSetReference>
+          <DataSetName>Hierarchy</DataSetName>
+          <ValueField>Value</ValueField>
+          <LabelField>Label</LabelField>
+        </DataSetReference>
+      </ValidValues>
+    </ReportParameter>
+    <ReportParameter Name="HierarchyNodeToCopy">
+      <DataType>Integer</DataType>
+      <Prompt>HierarchyNodeToCopy</Prompt>
+      <Hidden>true</Hidden>
+      <ValidValues>
+        <DataSetReference>
+          <DataSetName>FromHierarchyExploded</DataSetName>
+          <ValueField>HierarchyNodeKey</ValueField>
+          <LabelField>NodeDisplayName</LabelField>
+        </DataSetReference>
+      </ValidValues>
+    </ReportParameter>
+    <ReportParameter Name="HierarchyToCopyTo">
+      <DataType>Integer</DataType>
+      <Prompt>Hierarchy To Copy To:</Prompt>
+      <ValidValues>
+        <DataSetReference>
+          <DataSetName>Hierarchy</DataSetName>
+          <ValueField>Value</ValueField>
+          <LabelField>Label</LabelField>
+        </DataSetReference>
+      </ValidValues>
+    </ReportParameter>
+    <ReportParameter Name="ExpandAll">
+      <DataType>Boolean</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>true</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Expand All?</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <rd:ReportUnitType>Cm</rd:ReportUnitType>
+  <rd:ReportID>7216be61-b1e7-4951-9aec-c5b4cb62cf46</rd:ReportID>
+</Report>
