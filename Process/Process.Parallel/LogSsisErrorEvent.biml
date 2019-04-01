@@ -1,0 +1,18 @@
+﻿<Events>
+    <Event Name="OnError" ConstraintMode="LinearOnCompletion" EventType="OnError">
+        <Tasks>
+            <ExecuteSQL Name="Log Failure <#= i.ToString() #>" ConnectionName="EtlDB">
+                <Parameters>
+                    <Parameter Name="@EntityKey" VariableName="User.EntityKey" Length="-1" DataType="Int32" />
+                    <Parameter Name="@PackageName" VariableName="System.PackageName" Length="255" DataType="AnsiString" />
+                    <Parameter Name="@ErrorCode" VariableName="System.ErrorCode" Length="-1" DataType="Int32" />
+                    <Parameter Name="@ErrorDescription" VariableName="System.ErrorDescription" Length="8000" DataType="AnsiString" />
+                    <Parameter Name="@SourceName" VariableName="System.SourceName" Length="255" DataType="AnsiString" />
+                </Parameters>
+                <DirectInput>EXEC Process.up_LogSsisError ?, ?, ?, ?, ?</DirectInput>
+            </ExecuteSQL>
+            
+            <Expression Name="Disable Propagate" Expression="@[System::Propagate] = False" />
+        </Tasks>
+    </Event>
+</Events>

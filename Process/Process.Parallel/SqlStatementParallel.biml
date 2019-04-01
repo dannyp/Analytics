@@ -1,0 +1,142 @@
+﻿<#
+var packageName = "SqlStatementParallel";
+var processTypeKey = "1";
+var numberOfLegs = 4;
+#>
+
+<Biml xmlns="http://schemas.varigence.com/biml.xsd">
+    <#=CallBimlScript("ProjectHeader.biml", packageName)#>
+    <Packages>
+        <Package Name="<#= packageName #>" >
+            <Parameters>
+                <Parameter Name="DelayToGetNextEntity" DataType="String">00:00:30</Parameter>
+                <Parameter Name="EntityGroupKeyCommaSeparatedList" DataType="String">0</Parameter>
+                <Parameter Name="EntityToSetForDataIsReady" DataType="String"></Parameter>
+                <Parameter Name="NumberOfParallelExecutions" DataType="Int32">2</Parameter>
+                <Parameter Name="ScheduleName" DataType="String"></Parameter>
+            </Parameters>
+            <Variables>
+                <Variable Name="CountOfEntitiesStillToProcess" DataType="Int32" IncludeInDebugDump="Include" RaiseChangedEvent="true">-1</Variable>
+                <Variable Name="SetScheduleDateSql" DataType="String" IncludeInDebugDump="Exclude" EvaluateAsExpression="true">&quot;EXEC Process.up_SetScheduleStartDate &apos;&quot; + @[$Package::ScheduleName]+ &quot;&apos;;&quot;</Variable>
+            </Variables>
+            <SsisAnnotations>
+                <SsisAnnotation FontSize="20" FontStyle="Bold" Width="400" X="10" Y="10">DON'T CHANGE THIS SSIS PACKAGE MANUALLY. CHANGE THE BIML FILE INSTEAD</SsisAnnotation>
+            </SsisAnnotations>                    
+            <Tasks>
+                <#@ include file="TasksHeader.biml" #>
+
+                <Container Name="Main Flow" LoggingMode="Disabled">
+                    <PrecedenceConstraints>
+                        <Inputs>
+                            <Input OutputPathName="Are there any entities to Process?.Output" />
+                        </Inputs>
+                    </PrecedenceConstraints>
+                    <Expressions>
+                        <Expression ExternalProperty="Disable">@[User::CountOfEntitiesStillToProcess] == 0</Expression>
+                    </Expressions>
+                    <Tasks>
+                        <#@ include file="MainFlowHeader.biml" #>
+
+                        <# for (int i = 1; i <= numberOfLegs; i++) { #>
+                            <Container Name="Parallel Leg <#= i.ToString() #>" LoggingMode="Disabled" ConstraintMode="LinearOnSuccess">
+                                <Variables>
+                                    <Variable Name="EntityKey" DataType="Int32" IncludeInDebugDump="Include" RaiseChangedEvent="true">-1</Variable>
+                                    <Variable Name="DependencyEntityToSet" DataType="String" IncludeInDebugDump="Exclude" RaiseChangedEvent="true"></Variable>
+                                    <Variable Name="SqlStatement" DataType="String" IncludeInDebugDump="Exclude" RaiseChangedEvent="true"></Variable>
+                                    <Variable Name="ResultsJSON" DataType="String" IncludeInDebugDump="Exclude" RaiseChangedEvent="true"></Variable>
+                                    <Variable Name="AreAnyParallelLegsStillProcessing" DataType="Boolean" IncludeInDebugDump="Include" RaiseChangedEvent="true">True</Variable>
+                                </Variables>
+                                <Expressions>
+                                    <Expression ExternalProperty="Disable">@[$Package::NumberOfParallelExecutions] &lt; <#= i.ToString() #></Expression>
+                                </Expressions>       
+                                <Tasks>
+                                    <ExecuteSQL Name="Get Initial Entity To Process <#= i.ToString() #>" LoggingMode="Disabled" ConnectionName="EtlDB" ResultSet="SingleRow">
+                                        <Results>
+                                            <Result Name="0" VariableName="User.EntityKey" />
+                                            <Result Name="1" VariableName="User.DependencyEntityToSet" />
+                                            <Result Name="2" VariableName="User.SqlStatement" />
+                                        </Results>
+                                        <Parameters>
+                                            <Parameter Name="@EntityGroupKeyCommaSeparatedList" VariableName="EntityGroupKeyCommaSeparatedList" Length="-1" DataType="AnsiString" />
+                                        </Parameters>
+                                        <DirectInput>EXEC Process.up_GetEntityToProcess ?, <#= processTypeKey #></DirectInput>
+                                    </ExecuteSQL>
+                                    
+                                    <ExecuteSQL Name="Update Parallel Execution Control <#= i.ToString() #>" ConnectionName="EtlDB">
+                                        <Parameters>
+                                            <Parameter Name="@ExecutionInstanceGUID" VariableName="System.ExecutionInstanceGUID" Length="-1" DataType="AnsiString" />
+                                            <Parameter Name="@KeyCurrentlyBeingProcessed" VariableName="User.EntityKey" Length="-1" DataType="Int32" />
+                                        </Parameters>
+                                        <DirectInput>EXEC Process.up_UpdateParallelExecutionControl @ExecutionInstanceGUID = ?, @ParallelLegNumber = <#= i.ToString() #>, @KeyCurrentlyBeingProcessed = ?</DirectInput>
+                                    </ExecuteSQL>
+
+                                    <ForLoop Name="While more entities to process <#= i.ToString() #>" LoggingMode="Disabled" ConstraintMode="LinearOnSuccess">
+                                        <Tasks>
+                                            <ExecuteSQL Name="Pause <#= i.ToString() #>" ConnectionName="EtlDB">
+                                                <Expressions>
+                                                    <Expression ExternalProperty="Disable">@[User::EntityKey] &gt; 0</Expression>
+                                                </Expressions>
+                                                <Parameters>
+                                                    <Parameter Name="0" VariableName="DelayToGetNextEntity" Length="8" DataType="AnsiString" />
+                                                </Parameters>
+                                                <DirectInput>WAITFOR DELAY ?</DirectInput>
+                                            </ExecuteSQL>
+
+                                            <Container Name="Process Entity <#= i.ToString() #>" LoggingMode="Disabled" ConstraintMode="LinearOnSuccess">
+                                                <Expressions>
+                                                    <Expression ExternalProperty="Disable">@[User::EntityKey] == 0</Expression>
+                                                </Expressions>                                                       
+                                                <Tasks>
+                                                    <#@ include file="ProcessEntityHeader.biml" #>
+                                                    
+                                                    <!--
+                                                    *******************************************************************************************************************
+                                                    ********************************************** CUSTOM CODE GOES HERE **********************************************
+                                                    *******************************************************************************************************************
+                                                    -->
+
+                                                    <ExecuteSQL Name="Execute SQL <#= i.ToString() #>" DelayValidation="true" LoggingMode="Disabled" ConnectionName="EtlDB">
+                                                        <#@ include file="LogSsisErrorEvent.biml" #>
+                                                        <VariableInput VariableName="User.SqlStatement" />
+                                                    </ExecuteSQL>
+
+                                                    <ExecuteSQL Name="Set entity processing status <#= i.ToString() #>" ConnectionName="EtlDB">
+                                                        <Parameters>
+                                                            <Parameter Name="@EntityKey" VariableName="User.EntityKey" Length="-1" DataType="Int32" />
+                                                            <Parameter Name="@ResultsJSON" VariableName="User.ResultsJSON" Length="8000" DataType="AnsiString" />
+                                                        </Parameters>
+                                                        <DirectInput>EXEC Process.up_SetEntityProcessingSuccess ?, ?</DirectInput>
+                                                    </ExecuteSQL>
+                                                    
+                                                    <ExecuteSQL Name="Set dependency <#= i.ToString() #>" ConnectionName="EtlDB">
+                                                        <Expressions>
+                                                            <Expression ExternalProperty="Disable">LEN(@[User::DependencyEntityToSet]) == 0</Expression>
+                                                        </Expressions>
+                                                        <Parameters>
+                                                            <Parameter Name="@EntityCode" VariableName="User.DependencyEntityToSet" Length="-1" DataType="AnsiString" />
+                                                            <Parameter Name="@PackageExecutionID" VariableName="System.ExecutionInstanceGUID" Length="-1" DataType="AnsiString" />
+                                                        </Parameters>
+                                                        <DirectInput>EXEC Dependency.up_SetReadyStatus ?, ?</DirectInput>
+                                                    </ExecuteSQL>     
+
+                                                    <#@ include file="ProcessEntityFooter.biml" #>
+                                                </Tasks>
+                                            </Container>
+
+                                            <#@ include file="WhileLoopFooter.biml" #>
+                                        </Tasks>
+                                        <LoopTestExpression>@[User::AreAnyParallelLegsStillProcessing] == True</LoopTestExpression>
+                                    </ForLoop>                                        
+                                        
+                                </Tasks>
+                            </Container>
+                        <# }; #>
+                    </Tasks>
+                </Container>
+                
+                <#@ include file="PackageFooter.biml" #>
+
+            </Tasks>
+        </Package>
+    </Packages>
+</Biml>

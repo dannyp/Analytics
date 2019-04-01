@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2050
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{159641D6-6404-4A2A-AE62-294DE0FE8301}") = "Process.Parallel", "Process.Parallel.dtproj", "{9E7F7FB4-0070-4A82-98B5-0F0769E07D32}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		DEV|Default = DEV|Default
+		DEV02|Default = DEV02|Default
+		PROD|Default = PROD|Default
+		UAT|Default = UAT|Default
+		UAT02|Default = UAT02|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9E7F7FB4-0070-4A82-98B5-0F0769E07D32}.DEV|Default.ActiveCfg = DEV
+		{9E7F7FB4-0070-4A82-98B5-0F0769E07D32}.DEV|Default.Build.0 = DEV
+		{9E7F7FB4-0070-4A82-98B5-0F0769E07D32}.DEV02|Default.ActiveCfg = DEV02
+		{9E7F7FB4-0070-4A82-98B5-0F0769E07D32}.DEV02|Default.Build.0 = DEV02
+		{9E7F7FB4-0070-4A82-98B5-0F0769E07D32}.PROD|Default.ActiveCfg = PROD
+		{9E7F7FB4-0070-4A82-98B5-0F0769E07D32}.PROD|Default.Build.0 = PROD
+		{9E7F7FB4-0070-4A82-98B5-0F0769E07D32}.UAT|Default.ActiveCfg = UAT
+		{9E7F7FB4-0070-4A82-98B5-0F0769E07D32}.UAT|Default.Build.0 = UAT
+		{9E7F7FB4-0070-4A82-98B5-0F0769E07D32}.UAT02|Default.ActiveCfg = UAT02
+		{9E7F7FB4-0070-4A82-98B5-0F0769E07D32}.UAT02|Default.Build.0 = UAT02
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FFC1C2E7-F88F-445D-A7CD-A3A8B2B8141A}
+	EndGlobalSection
+EndGlobal

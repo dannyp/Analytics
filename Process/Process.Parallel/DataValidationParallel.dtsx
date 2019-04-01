@@ -1,0 +1,951 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DTS:Executable DTS:CreationDate="02/15/2019 07:57:40" DTS:CreationName="Microsoft.Package" DTS:CreatorComputerName="COMVS1021" DTS:CreatorName="tholl" DTS:DTSID="{D70662D4-056E-4A05-AB30-2A1777E1E16B}" DTS:ExecutableType="Microsoft.Package" DTS:LastModifiedProductVersion="" DTS:LocaleID="3081" DTS:ObjectName="DataValidationParallel" DTS:ProtectionLevel="0" DTS:refId="Package" DTS:VersionBuild="0" DTS:VersionGUID="{7ED01275-9208-4F60-84EA-631700EAB118}" DTS:VersionMajor="0" xmlns:DTS="www.microsoft.com/SqlServer/Dts">
+  <DTS:Property DTS:Name="PackageFormatVersion">8</DTS:Property>
+  <DTS:PackageParameters>
+    <DTS:PackageParameter DTS:CreationName="" DTS:DataType="8" DTS:Description="" DTS:DTSID="{DBDDE8C2-99F0-4C2C-842B-EC452D775057}" DTS:ObjectName="DelayToGetNextEntity" DTS:Required="0" DTS:Sensitive="0">
+      <DTS:Property DTS:DataType="8" DTS:Name="ParameterValue">00:00:30</DTS:Property>
+    </DTS:PackageParameter>
+    <DTS:PackageParameter DTS:CreationName="" DTS:DataType="8" DTS:Description="" DTS:DTSID="{2B1BDF5C-868D-4FAA-B866-471F8B2F5752}" DTS:ObjectName="EntityGroupKeyCommaSeparatedList" DTS:Required="0" DTS:Sensitive="0">
+      <DTS:Property DTS:DataType="8" DTS:Name="ParameterValue">0</DTS:Property>
+    </DTS:PackageParameter>
+    <DTS:PackageParameter DTS:CreationName="" DTS:DataType="8" DTS:Description="" DTS:DTSID="{DAE9B092-BC0B-47C5-BA54-BDCB3D77D29E}" DTS:ObjectName="EntityToSetForDataIsReady" DTS:Required="0" DTS:Sensitive="0">
+      <DTS:Property DTS:DataType="8" DTS:Name="ParameterValue" />
+    </DTS:PackageParameter>
+    <DTS:PackageParameter DTS:CreationName="" DTS:DataType="3" DTS:Description="" DTS:DTSID="{65C11719-5437-42F7-A3CF-8CE37ED0BBD7}" DTS:ObjectName="NumberOfParallelExecutions" DTS:Required="0" DTS:Sensitive="0">
+      <DTS:Property DTS:DataType="3" DTS:Name="ParameterValue">2</DTS:Property>
+    </DTS:PackageParameter>
+    <DTS:PackageParameter DTS:CreationName="" DTS:DataType="8" DTS:Description="" DTS:DTSID="{ACAEAE70-A9D6-41EE-A808-1C120782608D}" DTS:ObjectName="ScheduleName" DTS:Required="0" DTS:Sensitive="0">
+      <DTS:Property DTS:DataType="8" DTS:Name="ParameterValue" />
+    </DTS:PackageParameter>
+  </DTS:PackageParameters>
+  <DTS:Variables>
+    <DTS:Variable DTS:CreationName="" DTS:DTSID="{7B2D3C6D-C564-436D-A4B9-8CCD0D0DFD1D}" DTS:IncludeInDebugDump="6789" DTS:Namespace="User" DTS:ObjectName="CountOfEntitiesStillToProcess" DTS:RaiseChangedEvent="True">
+      <DTS:VariableValue DTS:DataType="3">-1</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable DTS:CreationName="" DTS:DTSID="{897A908D-9A88-4B48-A8FF-3834864E8723}" DTS:EvaluateAsExpression="True" DTS:Expression="&quot;EXEC Process.up_SetScheduleStartDate '&quot; + @[$Package::ScheduleName]+ &quot;';&quot;" DTS:IncludeInDebugDump="2345" DTS:Namespace="User" DTS:ObjectName="SetScheduleDateSql">
+      <DTS:VariableValue DTS:DataType="8">EXEC Process.up_SetScheduleStartDate '';</DTS:VariableValue>
+    </DTS:Variable>
+  </DTS:Variables>
+  <DTS:Executables>
+    <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{5BC4B626-11E0-4F04-A61C-DF2E3001C558}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Are there any entities to Process?" DTS:refId="Package\Are there any entities to Process?" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+      <DTS:LoggingOptions DTS:LoggingMode="2">
+        <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+      </DTS:LoggingOptions>
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:ResultType="ResultSetType_SingleRow" SQLTask:SqlStatementSource="EXEC Process.up_AreThereAnyEntitiesToProcess ?, 2" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="$Package::EntityGroupKeyCommaSeparatedList" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityGroupKeyCommaSeparatedList" SQLTask:ParameterSize="-1" />
+          <SQLTask:ResultBinding SQLTask:DtsVariableName="User::CountOfEntitiesStillToProcess" SQLTask:ResultName="0" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable DTS:CreationName="STOCK:SEQUENCE" DTS:DTSID="{0D4F139A-5A1A-46A7-95F0-1F6B02DBD5B6}" DTS:ExecutableType="STOCK:SEQUENCE" DTS:LocaleID="-1" DTS:ObjectName="Main Flow" DTS:refId="Package\Main Flow">
+      <DTS:Executables>
+        <DTS:Executable DTS:CreationName="STOCK:SEQUENCE" DTS:DTSID="{0A34A78B-5A42-4776-BE68-0DA073537D2C}" DTS:ExecutableType="STOCK:SEQUENCE" DTS:LocaleID="-1" DTS:ObjectName="Parallel Leg 1" DTS:refId="Package\Main Flow\Parallel Leg 1">
+          <DTS:Variables>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{F48791C3-F31C-4A4D-933A-A6BB3C9CCF88}" DTS:IncludeInDebugDump="6789" DTS:Namespace="User" DTS:ObjectName="EntityKey" DTS:RaiseChangedEvent="True">
+              <DTS:VariableValue DTS:DataType="3">-1</DTS:VariableValue>
+            </DTS:Variable>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{5F672B64-F0C9-48C8-96BB-A37B40DD5B79}" DTS:IncludeInDebugDump="2345" DTS:Namespace="User" DTS:ObjectName="DependencyEntityToSet" DTS:RaiseChangedEvent="True">
+              <DTS:VariableValue DTS:DataType="8" />
+            </DTS:Variable>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{65981195-E2D2-48B5-8820-E9BEC918E19D}" DTS:IncludeInDebugDump="6789" DTS:Namespace="User" DTS:ObjectName="RowCount" DTS:RaiseChangedEvent="True">
+              <DTS:VariableValue DTS:DataType="3">-1</DTS:VariableValue>
+            </DTS:Variable>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{27D69154-BEDD-4BD7-89E5-D957092FE069}" DTS:EvaluateAsExpression="True" DTS:Expression="&quot;{\&quot;RowCount\&quot;:&quot;+ (DT_WSTR, 10)@[User::RowCount] + &quot;}&quot;" DTS:IncludeInDebugDump="2345" DTS:Namespace="User" DTS:ObjectName="ResultsJSON">
+              <DTS:VariableValue DTS:DataType="8">{"RowCount":-1}</DTS:VariableValue>
+            </DTS:Variable>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{0F43A970-8B7A-4AB9-A573-59AD086985F1}" DTS:IncludeInDebugDump="2345" DTS:Namespace="User" DTS:ObjectName="SqlStatement" DTS:RaiseChangedEvent="True">
+              <DTS:VariableValue DTS:DataType="8" />
+            </DTS:Variable>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{90264E8E-B6E2-4867-AA5E-2F6C26F0FFAB}" DTS:IncludeInDebugDump="6789" DTS:Namespace="User" DTS:ObjectName="AreAnyParallelLegsStillProcessing" DTS:RaiseChangedEvent="True">
+              <DTS:VariableValue DTS:DataType="11">True</DTS:VariableValue>
+            </DTS:Variable>
+          </DTS:Variables>
+          <DTS:Executables>
+            <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{852AF01C-BB29-42C0-B40F-0834FD17F65C}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Get Initial Entity To Process 1" DTS:refId="Package\Main Flow\Parallel Leg 1\Get Initial Entity To Process 1" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:LoggingOptions DTS:LoggingMode="2">
+                <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+              </DTS:LoggingOptions>
+              <DTS:ObjectData>
+                <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:ResultType="ResultSetType_SingleRow" SQLTask:SqlStatementSource="EXEC Process.up_GetEntityToProcess ?, 2" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="$Package::EntityGroupKeyCommaSeparatedList" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityGroupKeyCommaSeparatedList" SQLTask:ParameterSize="-1" />
+                  <SQLTask:ResultBinding SQLTask:DtsVariableName="User::EntityKey" SQLTask:ResultName="0" />
+                  <SQLTask:ResultBinding SQLTask:DtsVariableName="User::DependencyEntityToSet" SQLTask:ResultName="1" />
+                  <SQLTask:ResultBinding SQLTask:DtsVariableName="User::SqlStatement" SQLTask:ResultName="2" />
+                </SQLTask:SqlTaskData>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{0E48EC08-23FD-4821-85B2-F01367F331B4}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Update Parallel Execution Control 1" DTS:refId="Package\Main Flow\Parallel Leg 1\Update Parallel Execution Control 1" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:ObjectData>
+                <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Process.up_UpdateParallelExecutionControl @ExecutionInstanceGUID = ?, @ParallelLegNumber = 1, @KeyCurrentlyBeingProcessed = ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::ExecutionInstanceGUID" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ExecutionInstanceGUID" SQLTask:ParameterSize="-1" />
+                  <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@KeyCurrentlyBeingProcessed" SQLTask:ParameterSize="-1" />
+                </SQLTask:SqlTaskData>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable DTS:AssignExpression="" DTS:CreationName="STOCK:FORLOOP" DTS:DTSID="{00991BA3-C9AB-4A59-A815-5B93210FA798}" DTS:EvalExpression="@[User::AreAnyParallelLegsStillProcessing] == True" DTS:ExecutableType="STOCK:FORLOOP" DTS:LocaleID="-1" DTS:ObjectName="While more entities to process 1" DTS:refId="Package\Main Flow\Parallel Leg 1\While more entities to process 1">
+              <DTS:Executables>
+                <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{C7BAAB16-AB8D-4C3B-8155-8D7E3BE75249}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Pause 1" DTS:refId="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Pause 1" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                  <DTS:ObjectData>
+                    <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="WAITFOR DELAY ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                      <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="$Package::DelayToGetNextEntity" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="0" SQLTask:ParameterSize="8" />
+                    </SQLTask:SqlTaskData>
+                  </DTS:ObjectData>
+                  <DTS:PropertyExpression DTS:Name="Disable">@[User::EntityKey] &gt; 0</DTS:PropertyExpression>
+                </DTS:Executable>
+                <DTS:Executable DTS:CreationName="STOCK:SEQUENCE" DTS:DTSID="{05C94266-203C-429C-A7DB-41E87E5FCCEB}" DTS:ExecutableType="STOCK:SEQUENCE" DTS:LocaleID="-1" DTS:ObjectName="Process Entity 1" DTS:refId="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1">
+                  <DTS:Executables>
+                    <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DelayValidation="True" DTS:DTSID="{1CE5B85D-AE7D-4B05-BF2A-CEE30EEFBCC6}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Check RowCount 1" DTS:refId="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1\Check RowCount 1" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                      <DTS:EventHandlers>
+                        <DTS:EventHandler DTS:CreationName="OnError" DTS:DTSID="{EEB0CEC4-C188-4F14-AC8C-6438CE6D8CB4}" DTS:EventID="0" DTS:EventName="OnError" DTS:LocaleID="-1" DTS:refId="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1\Check RowCount 1.EventHandlers[OnError]">
+                          <DTS:Variables>
+                            <DTS:Variable DTS:CreationName="" DTS:Description="The propagate property of the event" DTS:DTSID="{EE8CD8B5-FC91-4DE4-9090-D9396ED0E07F}" DTS:IncludeInDebugDump="6789" DTS:Namespace="System" DTS:ObjectName="Propagate">
+                              <DTS:VariableValue DTS:DataType="11">True</DTS:VariableValue>
+                            </DTS:Variable>
+                          </DTS:Variables>
+                          <DTS:Executables>
+                            <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{1DD6D337-45F1-49EF-8A37-6BF792E20017}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Log Failure 1" DTS:refId="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1\Check RowCount 1.EventHandlers[OnError]\Log Failure 1" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                              <DTS:ObjectData>
+                                <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Process.up_LogSsisError ?, ?, ?, ?, ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                                  <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityKey" SQLTask:ParameterSize="-1" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::PackageName" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@PackageName" SQLTask:ParameterSize="255" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="System::ErrorCode" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ErrorCode" SQLTask:ParameterSize="-1" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::ErrorDescription" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ErrorDescription" SQLTask:ParameterSize="8000" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::SourceName" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@SourceName" SQLTask:ParameterSize="255" />
+                                </SQLTask:SqlTaskData>
+                              </DTS:ObjectData>
+                            </DTS:Executable>
+                            <DTS:Executable DTS:CreationName="Microsoft.ExpressionTask" DTS:DTSID="{50149D9F-BFB0-42A4-B841-198B71E4A320}" DTS:ExecutableType="Microsoft.ExpressionTask" DTS:LocaleID="-1" DTS:ObjectName="Disable Propagate" DTS:refId="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1\Check RowCount 1.EventHandlers[OnError]\Disable Propagate" DTS:TaskContact="Expression Task;Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                              <DTS:ObjectData>
+                                <ExpressionTask Expression="@[System::Propagate] = False" />
+                              </DTS:ObjectData>
+                            </DTS:Executable>
+                          </DTS:Executables>
+                          <DTS:PrecedenceConstraints>
+                            <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{4048746A-2FB4-4618-8744-A16930B32B6B}" DTS:From="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1\Check RowCount 1.EventHandlers[OnError]\Log Failure 1" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Log Failure 1_To_Disable Propagate" DTS:refId="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1\Check RowCount 1.EventHandlers[OnError].PrecedenceConstraints[Constraint_Log Failure 1_To_Disable Propagate]" DTS:To="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1\Check RowCount 1.EventHandlers[OnError]\Disable Propagate" DTS:Value="2" />
+                          </DTS:PrecedenceConstraints>
+                        </DTS:EventHandler>
+                      </DTS:EventHandlers>
+                      <DTS:ObjectData>
+                        <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="SELECT 0" SQLTask:TimeOut="3600" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                          <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::RowCount" SQLTask:ParameterDirection="Output" SQLTask:ParameterName="0" SQLTask:ParameterSize="-1" />
+                        </SQLTask:SqlTaskData>
+                      </DTS:ObjectData>
+                      <DTS:PropertyExpression DTS:Name="SqlStatementSource">@[User::SqlStatement]</DTS:PropertyExpression>
+                    </DTS:Executable>
+                    <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:Disabled="True" DTS:DTSID="{97CA118B-EC02-4874-A424-29C49D9362DE}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Notify Users 1" DTS:refId="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1\Notify Users 1" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                      <DTS:EventHandlers>
+                        <DTS:EventHandler DTS:CreationName="OnError" DTS:DTSID="{E2A95586-3E82-4C9A-8972-48D8DEA13688}" DTS:EventID="0" DTS:EventName="OnError" DTS:LocaleID="-1" DTS:refId="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1\Notify Users 1.EventHandlers[OnError]">
+                          <DTS:Variables>
+                            <DTS:Variable DTS:CreationName="" DTS:Description="The propagate property of the event" DTS:DTSID="{11B90878-3E6B-4689-9D1B-46CFD0CA6AC5}" DTS:IncludeInDebugDump="6789" DTS:Namespace="System" DTS:ObjectName="Propagate">
+                              <DTS:VariableValue DTS:DataType="11">True</DTS:VariableValue>
+                            </DTS:Variable>
+                          </DTS:Variables>
+                          <DTS:Executables>
+                            <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{0F7F0F20-57E1-4D2F-84A5-67C1692CB551}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Log Failure 1" DTS:refId="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1\Notify Users 1.EventHandlers[OnError]\Log Failure 1" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                              <DTS:ObjectData>
+                                <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Process.up_LogSsisError ?, ?, ?, ?, ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                                  <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityKey" SQLTask:ParameterSize="-1" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::PackageName" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@PackageName" SQLTask:ParameterSize="255" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="System::ErrorCode" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ErrorCode" SQLTask:ParameterSize="-1" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::ErrorDescription" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ErrorDescription" SQLTask:ParameterSize="8000" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::SourceName" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@SourceName" SQLTask:ParameterSize="255" />
+                                </SQLTask:SqlTaskData>
+                              </DTS:ObjectData>
+                            </DTS:Executable>
+                            <DTS:Executable DTS:CreationName="Microsoft.ExpressionTask" DTS:DTSID="{1D54B207-1A03-4E61-9C5A-AA8F33B43FC6}" DTS:ExecutableType="Microsoft.ExpressionTask" DTS:LocaleID="-1" DTS:ObjectName="Disable Propagate" DTS:refId="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1\Notify Users 1.EventHandlers[OnError]\Disable Propagate" DTS:TaskContact="Expression Task;Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                              <DTS:ObjectData>
+                                <ExpressionTask Expression="@[System::Propagate] = False" />
+                              </DTS:ObjectData>
+                            </DTS:Executable>
+                          </DTS:Executables>
+                          <DTS:PrecedenceConstraints>
+                            <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{07500568-CCF4-45F5-8A47-8DA031F869E9}" DTS:From="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1\Notify Users 1.EventHandlers[OnError]\Log Failure 1" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Log Failure 1_To_Disable Propagate" DTS:refId="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1\Notify Users 1.EventHandlers[OnError].PrecedenceConstraints[Constraint_Log Failure 1_To_Disable Propagate]" DTS:To="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1\Notify Users 1.EventHandlers[OnError]\Disable Propagate" DTS:Value="2" />
+                          </DTS:PrecedenceConstraints>
+                        </DTS:EventHandler>
+                      </DTS:EventHandlers>
+                      <DTS:ObjectData>
+                        <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Process.up_NotifyDataValidationError ?, ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                          <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityKey" SQLTask:ParameterSize="-1" />
+                          <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::RowCount" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@RowCount" SQLTask:ParameterSize="-1" />
+                        </SQLTask:SqlTaskData>
+                      </DTS:ObjectData>
+                      <DTS:PropertyExpression DTS:Name="Disable">@[User::RowCount] == 0</DTS:PropertyExpression>
+                    </DTS:Executable>
+                    <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{9DF4A6C3-7BB7-4694-BEA1-7E06BA522B15}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Set entity processing status 1" DTS:refId="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1\Set entity processing status 1" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                      <DTS:ObjectData>
+                        <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Process.up_SetEntityProcessingSuccess ?, ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                          <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityKey" SQLTask:ParameterSize="-1" />
+                          <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="User::ResultsJSON" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ResultsJSON" SQLTask:ParameterSize="8000" />
+                        </SQLTask:SqlTaskData>
+                      </DTS:ObjectData>
+                    </DTS:Executable>
+                    <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{27E0CF50-E391-4E78-A174-D7247903C2AC}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Set dependency 1" DTS:refId="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1\Set dependency 1" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                      <DTS:ObjectData>
+                        <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Dependency.up_SetReadyStatus ?, ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                          <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="User::DependencyEntityToSet" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityCode" SQLTask:ParameterSize="-1" />
+                          <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::ExecutionInstanceGUID" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@PackageExecutionID" SQLTask:ParameterSize="-1" />
+                        </SQLTask:SqlTaskData>
+                      </DTS:ObjectData>
+                      <DTS:PropertyExpression DTS:Name="Disable">LEN(@[User::DependencyEntityToSet]) == 0</DTS:PropertyExpression>
+                    </DTS:Executable>
+                  </DTS:Executables>
+                  <DTS:LoggingOptions DTS:LoggingMode="2">
+                    <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+                  </DTS:LoggingOptions>
+                  <DTS:PrecedenceConstraints>
+                    <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{7C8272AD-F9AD-444F-BA7F-4CF652393FA3}" DTS:From="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1\Check RowCount 1" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Check RowCount 1_To_Notify Users 1" DTS:refId="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1.PrecedenceConstraints[Constraint_Check RowCount 1_To_Notify Users 1]" DTS:To="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1\Notify Users 1" />
+                    <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{ACCBF155-928E-46D3-B666-039309C27B01}" DTS:From="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1\Notify Users 1" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Notify Users 1_To_Set entity processing status 1" DTS:refId="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1.PrecedenceConstraints[Constraint_Notify Users 1_To_Set entity processing status 1]" DTS:To="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1\Set entity processing status 1" />
+                    <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{E0C74708-87E6-4FC2-9370-58D35230F01B}" DTS:From="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1\Set entity processing status 1" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Set entity processing status 1_To_Set dependency 1" DTS:refId="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1.PrecedenceConstraints[Constraint_Set entity processing status 1_To_Set dependency 1]" DTS:To="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1\Set dependency 1" />
+                  </DTS:PrecedenceConstraints>
+                  <DTS:PropertyExpression DTS:Name="Disable">@[User::EntityKey] == 0</DTS:PropertyExpression>
+                </DTS:Executable>
+                <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{32548B7F-44E5-4505-B2E6-55E0438EDFBB}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Get next entity To process 1" DTS:refId="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Get next entity To process 1" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                  <DTS:LoggingOptions DTS:LoggingMode="2">
+                    <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+                  </DTS:LoggingOptions>
+                  <DTS:ObjectData>
+                    <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:ResultType="ResultSetType_SingleRow" SQLTask:SqlStatementSource="EXEC Process.up_GetEntityToProcess ?, 2" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                      <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="$Package::EntityGroupKeyCommaSeparatedList" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityGroupKeyCommaSeparatedList" SQLTask:ParameterSize="-1" />
+                      <SQLTask:ResultBinding SQLTask:DtsVariableName="User::EntityKey" SQLTask:ResultName="0" />
+                      <SQLTask:ResultBinding SQLTask:DtsVariableName="User::DependencyEntityToSet" SQLTask:ResultName="1" />
+                      <SQLTask:ResultBinding SQLTask:DtsVariableName="User::SqlStatement" SQLTask:ResultName="2" />
+                    </SQLTask:SqlTaskData>
+                  </DTS:ObjectData>
+                </DTS:Executable>
+                <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{1847316E-704F-4857-B90C-DEEE481513E6}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Update parallel execution control 1" DTS:refId="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Update parallel execution control 1" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                  <DTS:ObjectData>
+                    <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:ResultType="ResultSetType_SingleRow" SQLTask:SqlStatementSource="EXEC Process.up_UpdateParallelExecutionControl @ExecutionInstanceGUID = ?, @ParallelLegNumber = 1, @KeyCurrentlyBeingProcessed = ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                      <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::ExecutionInstanceGUID" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ExecutionInstanceGUID" SQLTask:ParameterSize="-1" />
+                      <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@KeyCurrentlyBeingProcessed" SQLTask:ParameterSize="-1" />
+                      <SQLTask:ResultBinding SQLTask:DtsVariableName="User::AreAnyParallelLegsStillProcessing" SQLTask:ResultName="AreAnyParallelLegsStillProcessing" />
+                    </SQLTask:SqlTaskData>
+                  </DTS:ObjectData>
+                </DTS:Executable>
+              </DTS:Executables>
+              <DTS:LoggingOptions DTS:LoggingMode="2">
+                <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+              </DTS:LoggingOptions>
+              <DTS:PrecedenceConstraints>
+                <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{9CA4E9C4-EFA5-490B-BA6C-D1A24013C8AF}" DTS:From="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Pause 1" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Pause 1_To_Process Entity 1" DTS:refId="Package\Main Flow\Parallel Leg 1\While more entities to process 1.PrecedenceConstraints[Constraint_Pause 1_To_Process Entity 1]" DTS:To="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1" />
+                <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{46672D81-26CB-44CC-8CDA-A639A2DE0B96}" DTS:From="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Process Entity 1" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Process Entity 1_To_Get next entity To process 1" DTS:refId="Package\Main Flow\Parallel Leg 1\While more entities to process 1.PrecedenceConstraints[Constraint_Process Entity 1_To_Get next entity To process 1]" DTS:To="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Get next entity To process 1" />
+                <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{60488CD6-6D2B-472A-866E-9AA9008908AF}" DTS:From="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Get next entity To process 1" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Get next entity To process 1_To_Update parallel execution control 1" DTS:refId="Package\Main Flow\Parallel Leg 1\While more entities to process 1.PrecedenceConstraints[Constraint_Get next entity To process 1_To_Update parallel execution control 1]" DTS:To="Package\Main Flow\Parallel Leg 1\While more entities to process 1\Update parallel execution control 1" />
+              </DTS:PrecedenceConstraints>
+            </DTS:Executable>
+          </DTS:Executables>
+          <DTS:LoggingOptions DTS:LoggingMode="2">
+            <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+          </DTS:LoggingOptions>
+          <DTS:PrecedenceConstraints>
+            <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{1295E658-545B-4860-AC9F-6BD76576F91B}" DTS:From="Package\Main Flow\Parallel Leg 1\Get Initial Entity To Process 1" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Get Initial Entity To Process 1_To_Update Parallel Execution Control 1" DTS:refId="Package\Main Flow\Parallel Leg 1.PrecedenceConstraints[Constraint_Get Initial Entity To Process 1_To_Update Parallel Execution Control 1]" DTS:To="Package\Main Flow\Parallel Leg 1\Update Parallel Execution Control 1" />
+            <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{FA1C98FD-886D-496D-A16F-04D6F4A2DE03}" DTS:From="Package\Main Flow\Parallel Leg 1\Update Parallel Execution Control 1" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Update Parallel Execution Control 1_To_While more entities to process 1" DTS:refId="Package\Main Flow\Parallel Leg 1.PrecedenceConstraints[Constraint_Update Parallel Execution Control 1_To_While more entities to process 1]" DTS:To="Package\Main Flow\Parallel Leg 1\While more entities to process 1" />
+          </DTS:PrecedenceConstraints>
+          <DTS:PropertyExpression DTS:Name="Disable">@[$Package::NumberOfParallelExecutions] &lt; 1</DTS:PropertyExpression>
+        </DTS:Executable>
+        <DTS:Executable DTS:CreationName="STOCK:SEQUENCE" DTS:DTSID="{8242BF44-3097-4EB3-808C-EE396238F7D3}" DTS:ExecutableType="STOCK:SEQUENCE" DTS:LocaleID="-1" DTS:ObjectName="Parallel Leg 2" DTS:refId="Package\Main Flow\Parallel Leg 2">
+          <DTS:Variables>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{3DA7F6F8-2B1B-4A9E-936A-12193154F3CB}" DTS:IncludeInDebugDump="6789" DTS:Namespace="User" DTS:ObjectName="EntityKey" DTS:RaiseChangedEvent="True">
+              <DTS:VariableValue DTS:DataType="3">-1</DTS:VariableValue>
+            </DTS:Variable>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{ABCACF22-7581-4173-A094-E4F9647F3A69}" DTS:IncludeInDebugDump="2345" DTS:Namespace="User" DTS:ObjectName="DependencyEntityToSet" DTS:RaiseChangedEvent="True">
+              <DTS:VariableValue DTS:DataType="8" />
+            </DTS:Variable>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{87182F52-89E7-4326-9FD3-F688E36F596E}" DTS:IncludeInDebugDump="6789" DTS:Namespace="User" DTS:ObjectName="RowCount" DTS:RaiseChangedEvent="True">
+              <DTS:VariableValue DTS:DataType="3">-1</DTS:VariableValue>
+            </DTS:Variable>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{6CD64667-3818-48C5-9A22-E5CC4A6A155E}" DTS:EvaluateAsExpression="True" DTS:Expression="&quot;{\&quot;RowCount\&quot;:&quot;+ (DT_WSTR, 10)@[User::RowCount] + &quot;}&quot;" DTS:IncludeInDebugDump="2345" DTS:Namespace="User" DTS:ObjectName="ResultsJSON">
+              <DTS:VariableValue DTS:DataType="8">{"RowCount":-1}</DTS:VariableValue>
+            </DTS:Variable>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{6269BDA2-4F7E-4933-BCF2-271804592C58}" DTS:IncludeInDebugDump="2345" DTS:Namespace="User" DTS:ObjectName="SqlStatement" DTS:RaiseChangedEvent="True">
+              <DTS:VariableValue DTS:DataType="8" />
+            </DTS:Variable>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{BB724A5B-CC1D-48D6-987E-7224FE963048}" DTS:IncludeInDebugDump="6789" DTS:Namespace="User" DTS:ObjectName="AreAnyParallelLegsStillProcessing" DTS:RaiseChangedEvent="True">
+              <DTS:VariableValue DTS:DataType="11">True</DTS:VariableValue>
+            </DTS:Variable>
+          </DTS:Variables>
+          <DTS:Executables>
+            <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{5852385C-6CCD-439E-B702-B3CB23B9FF80}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Get Initial Entity To Process 2" DTS:refId="Package\Main Flow\Parallel Leg 2\Get Initial Entity To Process 2" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:LoggingOptions DTS:LoggingMode="2">
+                <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+              </DTS:LoggingOptions>
+              <DTS:ObjectData>
+                <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:ResultType="ResultSetType_SingleRow" SQLTask:SqlStatementSource="EXEC Process.up_GetEntityToProcess ?, 2" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="$Package::EntityGroupKeyCommaSeparatedList" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityGroupKeyCommaSeparatedList" SQLTask:ParameterSize="-1" />
+                  <SQLTask:ResultBinding SQLTask:DtsVariableName="User::EntityKey" SQLTask:ResultName="0" />
+                  <SQLTask:ResultBinding SQLTask:DtsVariableName="User::DependencyEntityToSet" SQLTask:ResultName="1" />
+                  <SQLTask:ResultBinding SQLTask:DtsVariableName="User::SqlStatement" SQLTask:ResultName="2" />
+                </SQLTask:SqlTaskData>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{DB61D85B-49AF-445F-B115-D9DB7854A872}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Update Parallel Execution Control 2" DTS:refId="Package\Main Flow\Parallel Leg 2\Update Parallel Execution Control 2" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:ObjectData>
+                <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Process.up_UpdateParallelExecutionControl @ExecutionInstanceGUID = ?, @ParallelLegNumber = 2, @KeyCurrentlyBeingProcessed = ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::ExecutionInstanceGUID" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ExecutionInstanceGUID" SQLTask:ParameterSize="-1" />
+                  <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@KeyCurrentlyBeingProcessed" SQLTask:ParameterSize="-1" />
+                </SQLTask:SqlTaskData>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable DTS:AssignExpression="" DTS:CreationName="STOCK:FORLOOP" DTS:DTSID="{5F7E3A57-AFB2-43EE-94BA-09627F18B9F1}" DTS:EvalExpression="@[User::AreAnyParallelLegsStillProcessing] == True" DTS:ExecutableType="STOCK:FORLOOP" DTS:LocaleID="-1" DTS:ObjectName="While more entities to process 2" DTS:refId="Package\Main Flow\Parallel Leg 2\While more entities to process 2">
+              <DTS:Executables>
+                <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{2F14499F-E575-43C4-AA03-98D900AE9FD9}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Pause 2" DTS:refId="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Pause 2" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                  <DTS:ObjectData>
+                    <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="WAITFOR DELAY ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                      <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="$Package::DelayToGetNextEntity" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="0" SQLTask:ParameterSize="8" />
+                    </SQLTask:SqlTaskData>
+                  </DTS:ObjectData>
+                  <DTS:PropertyExpression DTS:Name="Disable">@[User::EntityKey] &gt; 0</DTS:PropertyExpression>
+                </DTS:Executable>
+                <DTS:Executable DTS:CreationName="STOCK:SEQUENCE" DTS:DTSID="{2FAEDB29-0AED-4140-977A-C3C8E6CD160F}" DTS:ExecutableType="STOCK:SEQUENCE" DTS:LocaleID="-1" DTS:ObjectName="Process Entity 2" DTS:refId="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2">
+                  <DTS:Executables>
+                    <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DelayValidation="True" DTS:DTSID="{2465E3B2-97A0-45BF-9F70-5BFC2D90DB8E}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Check RowCount 2" DTS:refId="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2\Check RowCount 2" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                      <DTS:EventHandlers>
+                        <DTS:EventHandler DTS:CreationName="OnError" DTS:DTSID="{A27CA7F0-728D-4478-97F3-236317AAF750}" DTS:EventID="0" DTS:EventName="OnError" DTS:LocaleID="-1" DTS:refId="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2\Check RowCount 2.EventHandlers[OnError]">
+                          <DTS:Variables>
+                            <DTS:Variable DTS:CreationName="" DTS:Description="The propagate property of the event" DTS:DTSID="{1285CCDF-C3DB-4D8B-ADCF-6E145A7917C5}" DTS:IncludeInDebugDump="6789" DTS:Namespace="System" DTS:ObjectName="Propagate">
+                              <DTS:VariableValue DTS:DataType="11">True</DTS:VariableValue>
+                            </DTS:Variable>
+                          </DTS:Variables>
+                          <DTS:Executables>
+                            <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{449928CD-5A7F-4C81-AC2F-627B526472E7}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Log Failure 2" DTS:refId="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2\Check RowCount 2.EventHandlers[OnError]\Log Failure 2" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                              <DTS:ObjectData>
+                                <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Process.up_LogSsisError ?, ?, ?, ?, ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                                  <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityKey" SQLTask:ParameterSize="-1" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::PackageName" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@PackageName" SQLTask:ParameterSize="255" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="System::ErrorCode" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ErrorCode" SQLTask:ParameterSize="-1" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::ErrorDescription" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ErrorDescription" SQLTask:ParameterSize="8000" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::SourceName" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@SourceName" SQLTask:ParameterSize="255" />
+                                </SQLTask:SqlTaskData>
+                              </DTS:ObjectData>
+                            </DTS:Executable>
+                            <DTS:Executable DTS:CreationName="Microsoft.ExpressionTask" DTS:DTSID="{83A86385-C7FD-4F79-81EA-3F92FB0442C9}" DTS:ExecutableType="Microsoft.ExpressionTask" DTS:LocaleID="-1" DTS:ObjectName="Disable Propagate" DTS:refId="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2\Check RowCount 2.EventHandlers[OnError]\Disable Propagate" DTS:TaskContact="Expression Task;Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                              <DTS:ObjectData>
+                                <ExpressionTask Expression="@[System::Propagate] = False" />
+                              </DTS:ObjectData>
+                            </DTS:Executable>
+                          </DTS:Executables>
+                          <DTS:PrecedenceConstraints>
+                            <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{F96FB4A5-A60F-4934-BCF1-20744756C709}" DTS:From="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2\Check RowCount 2.EventHandlers[OnError]\Log Failure 2" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Log Failure 2_To_Disable Propagate" DTS:refId="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2\Check RowCount 2.EventHandlers[OnError].PrecedenceConstraints[Constraint_Log Failure 2_To_Disable Propagate]" DTS:To="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2\Check RowCount 2.EventHandlers[OnError]\Disable Propagate" DTS:Value="2" />
+                          </DTS:PrecedenceConstraints>
+                        </DTS:EventHandler>
+                      </DTS:EventHandlers>
+                      <DTS:ObjectData>
+                        <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="SELECT 0" SQLTask:TimeOut="3600" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                          <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::RowCount" SQLTask:ParameterDirection="Output" SQLTask:ParameterName="0" SQLTask:ParameterSize="-1" />
+                        </SQLTask:SqlTaskData>
+                      </DTS:ObjectData>
+                      <DTS:PropertyExpression DTS:Name="SqlStatementSource">@[User::SqlStatement]</DTS:PropertyExpression>
+                    </DTS:Executable>
+                    <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:Disabled="True" DTS:DTSID="{CAECC321-1842-4D86-B4EF-72BFF7C84826}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Notify Users 2" DTS:refId="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2\Notify Users 2" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                      <DTS:EventHandlers>
+                        <DTS:EventHandler DTS:CreationName="OnError" DTS:DTSID="{9A8BD412-1C05-4C03-8CD7-B0CF584B99C0}" DTS:EventID="0" DTS:EventName="OnError" DTS:LocaleID="-1" DTS:refId="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2\Notify Users 2.EventHandlers[OnError]">
+                          <DTS:Variables>
+                            <DTS:Variable DTS:CreationName="" DTS:Description="The propagate property of the event" DTS:DTSID="{E9CC6946-0FB7-4078-8FCF-B9766D03A4FC}" DTS:IncludeInDebugDump="6789" DTS:Namespace="System" DTS:ObjectName="Propagate">
+                              <DTS:VariableValue DTS:DataType="11">True</DTS:VariableValue>
+                            </DTS:Variable>
+                          </DTS:Variables>
+                          <DTS:Executables>
+                            <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{55785DF1-A554-47DE-BCC4-483678151629}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Log Failure 2" DTS:refId="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2\Notify Users 2.EventHandlers[OnError]\Log Failure 2" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                              <DTS:ObjectData>
+                                <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Process.up_LogSsisError ?, ?, ?, ?, ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                                  <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityKey" SQLTask:ParameterSize="-1" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::PackageName" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@PackageName" SQLTask:ParameterSize="255" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="System::ErrorCode" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ErrorCode" SQLTask:ParameterSize="-1" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::ErrorDescription" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ErrorDescription" SQLTask:ParameterSize="8000" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::SourceName" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@SourceName" SQLTask:ParameterSize="255" />
+                                </SQLTask:SqlTaskData>
+                              </DTS:ObjectData>
+                            </DTS:Executable>
+                            <DTS:Executable DTS:CreationName="Microsoft.ExpressionTask" DTS:DTSID="{E9E84FA5-B32D-4BF3-802F-1FA2D240EFA0}" DTS:ExecutableType="Microsoft.ExpressionTask" DTS:LocaleID="-1" DTS:ObjectName="Disable Propagate" DTS:refId="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2\Notify Users 2.EventHandlers[OnError]\Disable Propagate" DTS:TaskContact="Expression Task;Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                              <DTS:ObjectData>
+                                <ExpressionTask Expression="@[System::Propagate] = False" />
+                              </DTS:ObjectData>
+                            </DTS:Executable>
+                          </DTS:Executables>
+                          <DTS:PrecedenceConstraints>
+                            <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{6A5B6DBF-3F84-41D6-8EAF-D52B47D64E55}" DTS:From="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2\Notify Users 2.EventHandlers[OnError]\Log Failure 2" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Log Failure 2_To_Disable Propagate" DTS:refId="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2\Notify Users 2.EventHandlers[OnError].PrecedenceConstraints[Constraint_Log Failure 2_To_Disable Propagate]" DTS:To="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2\Notify Users 2.EventHandlers[OnError]\Disable Propagate" DTS:Value="2" />
+                          </DTS:PrecedenceConstraints>
+                        </DTS:EventHandler>
+                      </DTS:EventHandlers>
+                      <DTS:ObjectData>
+                        <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Process.up_NotifyDataValidationError ?, ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                          <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityKey" SQLTask:ParameterSize="-1" />
+                          <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::RowCount" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@RowCount" SQLTask:ParameterSize="-1" />
+                        </SQLTask:SqlTaskData>
+                      </DTS:ObjectData>
+                      <DTS:PropertyExpression DTS:Name="Disable">@[User::RowCount] == 0</DTS:PropertyExpression>
+                    </DTS:Executable>
+                    <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{B5DDEA1A-D663-4A51-AF0C-CA1AD5348E88}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Set entity processing status 2" DTS:refId="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2\Set entity processing status 2" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                      <DTS:ObjectData>
+                        <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Process.up_SetEntityProcessingSuccess ?, ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                          <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityKey" SQLTask:ParameterSize="-1" />
+                          <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="User::ResultsJSON" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ResultsJSON" SQLTask:ParameterSize="8000" />
+                        </SQLTask:SqlTaskData>
+                      </DTS:ObjectData>
+                    </DTS:Executable>
+                    <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{1E2A45C6-1DA1-485D-AA43-11B7D0BE0EF3}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Set dependency 2" DTS:refId="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2\Set dependency 2" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                      <DTS:ObjectData>
+                        <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Dependency.up_SetReadyStatus ?, ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                          <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="User::DependencyEntityToSet" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityCode" SQLTask:ParameterSize="-1" />
+                          <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::ExecutionInstanceGUID" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@PackageExecutionID" SQLTask:ParameterSize="-1" />
+                        </SQLTask:SqlTaskData>
+                      </DTS:ObjectData>
+                      <DTS:PropertyExpression DTS:Name="Disable">LEN(@[User::DependencyEntityToSet]) == 0</DTS:PropertyExpression>
+                    </DTS:Executable>
+                  </DTS:Executables>
+                  <DTS:LoggingOptions DTS:LoggingMode="2">
+                    <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+                  </DTS:LoggingOptions>
+                  <DTS:PrecedenceConstraints>
+                    <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{5E28D429-8107-4B5B-AD23-1D506468AE90}" DTS:From="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2\Check RowCount 2" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Check RowCount 2_To_Notify Users 2" DTS:refId="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2.PrecedenceConstraints[Constraint_Check RowCount 2_To_Notify Users 2]" DTS:To="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2\Notify Users 2" />
+                    <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{D5006AED-ACEA-4CE4-93F2-DED8FC333CF0}" DTS:From="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2\Notify Users 2" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Notify Users 2_To_Set entity processing status 2" DTS:refId="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2.PrecedenceConstraints[Constraint_Notify Users 2_To_Set entity processing status 2]" DTS:To="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2\Set entity processing status 2" />
+                    <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{C52AF66F-C4CD-4356-B119-430E56A2839D}" DTS:From="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2\Set entity processing status 2" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Set entity processing status 2_To_Set dependency 2" DTS:refId="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2.PrecedenceConstraints[Constraint_Set entity processing status 2_To_Set dependency 2]" DTS:To="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2\Set dependency 2" />
+                  </DTS:PrecedenceConstraints>
+                  <DTS:PropertyExpression DTS:Name="Disable">@[User::EntityKey] == 0</DTS:PropertyExpression>
+                </DTS:Executable>
+                <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{C566C709-8C82-473C-8CE6-05BED77B61F2}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Get next entity To process 2" DTS:refId="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Get next entity To process 2" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                  <DTS:LoggingOptions DTS:LoggingMode="2">
+                    <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+                  </DTS:LoggingOptions>
+                  <DTS:ObjectData>
+                    <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:ResultType="ResultSetType_SingleRow" SQLTask:SqlStatementSource="EXEC Process.up_GetEntityToProcess ?, 2" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                      <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="$Package::EntityGroupKeyCommaSeparatedList" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityGroupKeyCommaSeparatedList" SQLTask:ParameterSize="-1" />
+                      <SQLTask:ResultBinding SQLTask:DtsVariableName="User::EntityKey" SQLTask:ResultName="0" />
+                      <SQLTask:ResultBinding SQLTask:DtsVariableName="User::DependencyEntityToSet" SQLTask:ResultName="1" />
+                      <SQLTask:ResultBinding SQLTask:DtsVariableName="User::SqlStatement" SQLTask:ResultName="2" />
+                    </SQLTask:SqlTaskData>
+                  </DTS:ObjectData>
+                </DTS:Executable>
+                <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{C1182C68-CDDD-4E51-831E-F2C3AA2B9D11}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Update parallel execution control 2" DTS:refId="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Update parallel execution control 2" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                  <DTS:ObjectData>
+                    <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:ResultType="ResultSetType_SingleRow" SQLTask:SqlStatementSource="EXEC Process.up_UpdateParallelExecutionControl @ExecutionInstanceGUID = ?, @ParallelLegNumber = 2, @KeyCurrentlyBeingProcessed = ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                      <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::ExecutionInstanceGUID" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ExecutionInstanceGUID" SQLTask:ParameterSize="-1" />
+                      <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@KeyCurrentlyBeingProcessed" SQLTask:ParameterSize="-1" />
+                      <SQLTask:ResultBinding SQLTask:DtsVariableName="User::AreAnyParallelLegsStillProcessing" SQLTask:ResultName="AreAnyParallelLegsStillProcessing" />
+                    </SQLTask:SqlTaskData>
+                  </DTS:ObjectData>
+                </DTS:Executable>
+              </DTS:Executables>
+              <DTS:LoggingOptions DTS:LoggingMode="2">
+                <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+              </DTS:LoggingOptions>
+              <DTS:PrecedenceConstraints>
+                <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{96423317-8BB6-4047-B08B-D7D99BB928C8}" DTS:From="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Pause 2" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Pause 2_To_Process Entity 2" DTS:refId="Package\Main Flow\Parallel Leg 2\While more entities to process 2.PrecedenceConstraints[Constraint_Pause 2_To_Process Entity 2]" DTS:To="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2" />
+                <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{5CA319BA-2EB0-4D2D-B4B3-C613650C7748}" DTS:From="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Process Entity 2" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Process Entity 2_To_Get next entity To process 2" DTS:refId="Package\Main Flow\Parallel Leg 2\While more entities to process 2.PrecedenceConstraints[Constraint_Process Entity 2_To_Get next entity To process 2]" DTS:To="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Get next entity To process 2" />
+                <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{790B609A-6E02-41FF-8051-3B793A018534}" DTS:From="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Get next entity To process 2" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Get next entity To process 2_To_Update parallel execution control 2" DTS:refId="Package\Main Flow\Parallel Leg 2\While more entities to process 2.PrecedenceConstraints[Constraint_Get next entity To process 2_To_Update parallel execution control 2]" DTS:To="Package\Main Flow\Parallel Leg 2\While more entities to process 2\Update parallel execution control 2" />
+              </DTS:PrecedenceConstraints>
+            </DTS:Executable>
+          </DTS:Executables>
+          <DTS:LoggingOptions DTS:LoggingMode="2">
+            <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+          </DTS:LoggingOptions>
+          <DTS:PrecedenceConstraints>
+            <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{7C6D8561-0719-40BE-850B-748C6D2ED2A6}" DTS:From="Package\Main Flow\Parallel Leg 2\Get Initial Entity To Process 2" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Get Initial Entity To Process 2_To_Update Parallel Execution Control 2" DTS:refId="Package\Main Flow\Parallel Leg 2.PrecedenceConstraints[Constraint_Get Initial Entity To Process 2_To_Update Parallel Execution Control 2]" DTS:To="Package\Main Flow\Parallel Leg 2\Update Parallel Execution Control 2" />
+            <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{5532F254-90B7-4B18-A8AB-60F1D118ABBD}" DTS:From="Package\Main Flow\Parallel Leg 2\Update Parallel Execution Control 2" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Update Parallel Execution Control 2_To_While more entities to process 2" DTS:refId="Package\Main Flow\Parallel Leg 2.PrecedenceConstraints[Constraint_Update Parallel Execution Control 2_To_While more entities to process 2]" DTS:To="Package\Main Flow\Parallel Leg 2\While more entities to process 2" />
+          </DTS:PrecedenceConstraints>
+          <DTS:PropertyExpression DTS:Name="Disable">@[$Package::NumberOfParallelExecutions] &lt; 2</DTS:PropertyExpression>
+        </DTS:Executable>
+        <DTS:Executable DTS:CreationName="STOCK:SEQUENCE" DTS:DTSID="{AE621C9B-89B2-4E9E-9ACE-B17E9309290D}" DTS:ExecutableType="STOCK:SEQUENCE" DTS:LocaleID="-1" DTS:ObjectName="Parallel Leg 3" DTS:refId="Package\Main Flow\Parallel Leg 3">
+          <DTS:Variables>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{4FF88E84-D654-4F6D-AA0E-34E5AD99BA09}" DTS:IncludeInDebugDump="6789" DTS:Namespace="User" DTS:ObjectName="EntityKey" DTS:RaiseChangedEvent="True">
+              <DTS:VariableValue DTS:DataType="3">-1</DTS:VariableValue>
+            </DTS:Variable>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{D2DFEA6E-9734-40FD-AAFB-45221307DA6F}" DTS:IncludeInDebugDump="2345" DTS:Namespace="User" DTS:ObjectName="DependencyEntityToSet" DTS:RaiseChangedEvent="True">
+              <DTS:VariableValue DTS:DataType="8" />
+            </DTS:Variable>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{EA0646C9-27C5-4107-AA9E-395246E843F9}" DTS:IncludeInDebugDump="6789" DTS:Namespace="User" DTS:ObjectName="RowCount" DTS:RaiseChangedEvent="True">
+              <DTS:VariableValue DTS:DataType="3">-1</DTS:VariableValue>
+            </DTS:Variable>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{959B20EC-A005-419A-812D-D49DD92C8675}" DTS:EvaluateAsExpression="True" DTS:Expression="&quot;{\&quot;RowCount\&quot;:&quot;+ (DT_WSTR, 10)@[User::RowCount] + &quot;}&quot;" DTS:IncludeInDebugDump="2345" DTS:Namespace="User" DTS:ObjectName="ResultsJSON">
+              <DTS:VariableValue DTS:DataType="8">{"RowCount":-1}</DTS:VariableValue>
+            </DTS:Variable>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{C7427447-A166-4F15-9125-59AE52AE1658}" DTS:IncludeInDebugDump="2345" DTS:Namespace="User" DTS:ObjectName="SqlStatement" DTS:RaiseChangedEvent="True">
+              <DTS:VariableValue DTS:DataType="8" />
+            </DTS:Variable>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{7A7508B0-33FE-4E50-9552-E7948B680AF1}" DTS:IncludeInDebugDump="6789" DTS:Namespace="User" DTS:ObjectName="AreAnyParallelLegsStillProcessing" DTS:RaiseChangedEvent="True">
+              <DTS:VariableValue DTS:DataType="11">True</DTS:VariableValue>
+            </DTS:Variable>
+          </DTS:Variables>
+          <DTS:Executables>
+            <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{2F8742A9-6979-4B65-9B00-C845379B3EFF}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Get Initial Entity To Process 3" DTS:refId="Package\Main Flow\Parallel Leg 3\Get Initial Entity To Process 3" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:LoggingOptions DTS:LoggingMode="2">
+                <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+              </DTS:LoggingOptions>
+              <DTS:ObjectData>
+                <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:ResultType="ResultSetType_SingleRow" SQLTask:SqlStatementSource="EXEC Process.up_GetEntityToProcess ?, 2" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="$Package::EntityGroupKeyCommaSeparatedList" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityGroupKeyCommaSeparatedList" SQLTask:ParameterSize="-1" />
+                  <SQLTask:ResultBinding SQLTask:DtsVariableName="User::EntityKey" SQLTask:ResultName="0" />
+                  <SQLTask:ResultBinding SQLTask:DtsVariableName="User::DependencyEntityToSet" SQLTask:ResultName="1" />
+                  <SQLTask:ResultBinding SQLTask:DtsVariableName="User::SqlStatement" SQLTask:ResultName="2" />
+                </SQLTask:SqlTaskData>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{8DA114B5-9C91-480D-9B6C-A81C1DF4E006}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Update Parallel Execution Control 3" DTS:refId="Package\Main Flow\Parallel Leg 3\Update Parallel Execution Control 3" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:ObjectData>
+                <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Process.up_UpdateParallelExecutionControl @ExecutionInstanceGUID = ?, @ParallelLegNumber = 3, @KeyCurrentlyBeingProcessed = ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::ExecutionInstanceGUID" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ExecutionInstanceGUID" SQLTask:ParameterSize="-1" />
+                  <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@KeyCurrentlyBeingProcessed" SQLTask:ParameterSize="-1" />
+                </SQLTask:SqlTaskData>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable DTS:AssignExpression="" DTS:CreationName="STOCK:FORLOOP" DTS:DTSID="{FE79265B-E3F8-45DB-9008-3378C4A93E67}" DTS:EvalExpression="@[User::AreAnyParallelLegsStillProcessing] == True" DTS:ExecutableType="STOCK:FORLOOP" DTS:LocaleID="-1" DTS:ObjectName="While more entities to process 3" DTS:refId="Package\Main Flow\Parallel Leg 3\While more entities to process 3">
+              <DTS:Executables>
+                <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{5D020755-9DAE-4819-A7B7-1A392C47B992}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Pause 3" DTS:refId="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Pause 3" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                  <DTS:ObjectData>
+                    <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="WAITFOR DELAY ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                      <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="$Package::DelayToGetNextEntity" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="0" SQLTask:ParameterSize="8" />
+                    </SQLTask:SqlTaskData>
+                  </DTS:ObjectData>
+                  <DTS:PropertyExpression DTS:Name="Disable">@[User::EntityKey] &gt; 0</DTS:PropertyExpression>
+                </DTS:Executable>
+                <DTS:Executable DTS:CreationName="STOCK:SEQUENCE" DTS:DTSID="{51510306-6C29-4ED3-B7EC-D1175231AD3F}" DTS:ExecutableType="STOCK:SEQUENCE" DTS:LocaleID="-1" DTS:ObjectName="Process Entity 3" DTS:refId="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3">
+                  <DTS:Executables>
+                    <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DelayValidation="True" DTS:DTSID="{94C91F4B-786A-4835-AC4F-DC274000DE20}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Check RowCount 3" DTS:refId="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3\Check RowCount 3" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                      <DTS:EventHandlers>
+                        <DTS:EventHandler DTS:CreationName="OnError" DTS:DTSID="{D6DA7F07-75D2-425C-BA97-5BC6EC4D59B0}" DTS:EventID="0" DTS:EventName="OnError" DTS:LocaleID="-1" DTS:refId="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3\Check RowCount 3.EventHandlers[OnError]">
+                          <DTS:Variables>
+                            <DTS:Variable DTS:CreationName="" DTS:Description="The propagate property of the event" DTS:DTSID="{AAB3D9B6-AC5F-4116-B4F5-319D362AAD77}" DTS:IncludeInDebugDump="6789" DTS:Namespace="System" DTS:ObjectName="Propagate">
+                              <DTS:VariableValue DTS:DataType="11">True</DTS:VariableValue>
+                            </DTS:Variable>
+                          </DTS:Variables>
+                          <DTS:Executables>
+                            <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{55735A9A-D7B5-4A84-99DE-460861E1E7B8}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Log Failure 3" DTS:refId="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3\Check RowCount 3.EventHandlers[OnError]\Log Failure 3" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                              <DTS:ObjectData>
+                                <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Process.up_LogSsisError ?, ?, ?, ?, ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                                  <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityKey" SQLTask:ParameterSize="-1" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::PackageName" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@PackageName" SQLTask:ParameterSize="255" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="System::ErrorCode" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ErrorCode" SQLTask:ParameterSize="-1" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::ErrorDescription" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ErrorDescription" SQLTask:ParameterSize="8000" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::SourceName" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@SourceName" SQLTask:ParameterSize="255" />
+                                </SQLTask:SqlTaskData>
+                              </DTS:ObjectData>
+                            </DTS:Executable>
+                            <DTS:Executable DTS:CreationName="Microsoft.ExpressionTask" DTS:DTSID="{8CB2D43F-0167-4CFE-B994-713DEA55ED13}" DTS:ExecutableType="Microsoft.ExpressionTask" DTS:LocaleID="-1" DTS:ObjectName="Disable Propagate" DTS:refId="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3\Check RowCount 3.EventHandlers[OnError]\Disable Propagate" DTS:TaskContact="Expression Task;Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                              <DTS:ObjectData>
+                                <ExpressionTask Expression="@[System::Propagate] = False" />
+                              </DTS:ObjectData>
+                            </DTS:Executable>
+                          </DTS:Executables>
+                          <DTS:PrecedenceConstraints>
+                            <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{28285434-4D88-450E-9474-F3D70E56327B}" DTS:From="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3\Check RowCount 3.EventHandlers[OnError]\Log Failure 3" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Log Failure 3_To_Disable Propagate" DTS:refId="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3\Check RowCount 3.EventHandlers[OnError].PrecedenceConstraints[Constraint_Log Failure 3_To_Disable Propagate]" DTS:To="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3\Check RowCount 3.EventHandlers[OnError]\Disable Propagate" DTS:Value="2" />
+                          </DTS:PrecedenceConstraints>
+                        </DTS:EventHandler>
+                      </DTS:EventHandlers>
+                      <DTS:ObjectData>
+                        <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="SELECT 0" SQLTask:TimeOut="3600" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                          <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::RowCount" SQLTask:ParameterDirection="Output" SQLTask:ParameterName="0" SQLTask:ParameterSize="-1" />
+                        </SQLTask:SqlTaskData>
+                      </DTS:ObjectData>
+                      <DTS:PropertyExpression DTS:Name="SqlStatementSource">@[User::SqlStatement]</DTS:PropertyExpression>
+                    </DTS:Executable>
+                    <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:Disabled="True" DTS:DTSID="{32FBCB06-C615-4690-81BC-34068120688B}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Notify Users 3" DTS:refId="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3\Notify Users 3" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                      <DTS:EventHandlers>
+                        <DTS:EventHandler DTS:CreationName="OnError" DTS:DTSID="{6F3EEA07-8A13-43B2-8BC4-04690DE756D9}" DTS:EventID="0" DTS:EventName="OnError" DTS:LocaleID="-1" DTS:refId="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3\Notify Users 3.EventHandlers[OnError]">
+                          <DTS:Variables>
+                            <DTS:Variable DTS:CreationName="" DTS:Description="The propagate property of the event" DTS:DTSID="{BDC37552-FE5B-4AF3-A491-C129ABD80BCB}" DTS:IncludeInDebugDump="6789" DTS:Namespace="System" DTS:ObjectName="Propagate">
+                              <DTS:VariableValue DTS:DataType="11">True</DTS:VariableValue>
+                            </DTS:Variable>
+                          </DTS:Variables>
+                          <DTS:Executables>
+                            <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{1AC161B5-7F0E-4D91-A23D-AC4F5EB24874}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Log Failure 3" DTS:refId="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3\Notify Users 3.EventHandlers[OnError]\Log Failure 3" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                              <DTS:ObjectData>
+                                <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Process.up_LogSsisError ?, ?, ?, ?, ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                                  <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityKey" SQLTask:ParameterSize="-1" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::PackageName" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@PackageName" SQLTask:ParameterSize="255" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="System::ErrorCode" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ErrorCode" SQLTask:ParameterSize="-1" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::ErrorDescription" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ErrorDescription" SQLTask:ParameterSize="8000" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::SourceName" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@SourceName" SQLTask:ParameterSize="255" />
+                                </SQLTask:SqlTaskData>
+                              </DTS:ObjectData>
+                            </DTS:Executable>
+                            <DTS:Executable DTS:CreationName="Microsoft.ExpressionTask" DTS:DTSID="{555E6419-63FF-42C6-8250-E6D8ECD41628}" DTS:ExecutableType="Microsoft.ExpressionTask" DTS:LocaleID="-1" DTS:ObjectName="Disable Propagate" DTS:refId="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3\Notify Users 3.EventHandlers[OnError]\Disable Propagate" DTS:TaskContact="Expression Task;Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                              <DTS:ObjectData>
+                                <ExpressionTask Expression="@[System::Propagate] = False" />
+                              </DTS:ObjectData>
+                            </DTS:Executable>
+                          </DTS:Executables>
+                          <DTS:PrecedenceConstraints>
+                            <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{AEDB8D23-A215-4437-92B1-698681347B22}" DTS:From="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3\Notify Users 3.EventHandlers[OnError]\Log Failure 3" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Log Failure 3_To_Disable Propagate" DTS:refId="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3\Notify Users 3.EventHandlers[OnError].PrecedenceConstraints[Constraint_Log Failure 3_To_Disable Propagate]" DTS:To="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3\Notify Users 3.EventHandlers[OnError]\Disable Propagate" DTS:Value="2" />
+                          </DTS:PrecedenceConstraints>
+                        </DTS:EventHandler>
+                      </DTS:EventHandlers>
+                      <DTS:ObjectData>
+                        <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Process.up_NotifyDataValidationError ?, ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                          <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityKey" SQLTask:ParameterSize="-1" />
+                          <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::RowCount" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@RowCount" SQLTask:ParameterSize="-1" />
+                        </SQLTask:SqlTaskData>
+                      </DTS:ObjectData>
+                      <DTS:PropertyExpression DTS:Name="Disable">@[User::RowCount] == 0</DTS:PropertyExpression>
+                    </DTS:Executable>
+                    <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{50CA095A-C67A-4ED3-95B2-9658B9B80DDA}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Set entity processing status 3" DTS:refId="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3\Set entity processing status 3" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                      <DTS:ObjectData>
+                        <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Process.up_SetEntityProcessingSuccess ?, ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                          <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityKey" SQLTask:ParameterSize="-1" />
+                          <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="User::ResultsJSON" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ResultsJSON" SQLTask:ParameterSize="8000" />
+                        </SQLTask:SqlTaskData>
+                      </DTS:ObjectData>
+                    </DTS:Executable>
+                    <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{7FE424CA-0300-43F2-98B2-B2CBA8C4C1E1}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Set dependency 3" DTS:refId="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3\Set dependency 3" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                      <DTS:ObjectData>
+                        <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Dependency.up_SetReadyStatus ?, ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                          <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="User::DependencyEntityToSet" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityCode" SQLTask:ParameterSize="-1" />
+                          <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::ExecutionInstanceGUID" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@PackageExecutionID" SQLTask:ParameterSize="-1" />
+                        </SQLTask:SqlTaskData>
+                      </DTS:ObjectData>
+                      <DTS:PropertyExpression DTS:Name="Disable">LEN(@[User::DependencyEntityToSet]) == 0</DTS:PropertyExpression>
+                    </DTS:Executable>
+                  </DTS:Executables>
+                  <DTS:LoggingOptions DTS:LoggingMode="2">
+                    <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+                  </DTS:LoggingOptions>
+                  <DTS:PrecedenceConstraints>
+                    <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{2DB9F2F8-AEC6-4053-9F0E-C067F5FCF33A}" DTS:From="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3\Check RowCount 3" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Check RowCount 3_To_Notify Users 3" DTS:refId="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3.PrecedenceConstraints[Constraint_Check RowCount 3_To_Notify Users 3]" DTS:To="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3\Notify Users 3" />
+                    <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{DDCF29FD-BB82-413F-8A1B-C57288737F6B}" DTS:From="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3\Notify Users 3" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Notify Users 3_To_Set entity processing status 3" DTS:refId="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3.PrecedenceConstraints[Constraint_Notify Users 3_To_Set entity processing status 3]" DTS:To="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3\Set entity processing status 3" />
+                    <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{5CE82455-087D-4938-B4BC-DA4624D9D7F7}" DTS:From="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3\Set entity processing status 3" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Set entity processing status 3_To_Set dependency 3" DTS:refId="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3.PrecedenceConstraints[Constraint_Set entity processing status 3_To_Set dependency 3]" DTS:To="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3\Set dependency 3" />
+                  </DTS:PrecedenceConstraints>
+                  <DTS:PropertyExpression DTS:Name="Disable">@[User::EntityKey] == 0</DTS:PropertyExpression>
+                </DTS:Executable>
+                <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{F246A64F-8AB7-4402-88CB-DD77074A877D}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Get next entity To process 3" DTS:refId="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Get next entity To process 3" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                  <DTS:LoggingOptions DTS:LoggingMode="2">
+                    <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+                  </DTS:LoggingOptions>
+                  <DTS:ObjectData>
+                    <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:ResultType="ResultSetType_SingleRow" SQLTask:SqlStatementSource="EXEC Process.up_GetEntityToProcess ?, 2" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                      <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="$Package::EntityGroupKeyCommaSeparatedList" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityGroupKeyCommaSeparatedList" SQLTask:ParameterSize="-1" />
+                      <SQLTask:ResultBinding SQLTask:DtsVariableName="User::EntityKey" SQLTask:ResultName="0" />
+                      <SQLTask:ResultBinding SQLTask:DtsVariableName="User::DependencyEntityToSet" SQLTask:ResultName="1" />
+                      <SQLTask:ResultBinding SQLTask:DtsVariableName="User::SqlStatement" SQLTask:ResultName="2" />
+                    </SQLTask:SqlTaskData>
+                  </DTS:ObjectData>
+                </DTS:Executable>
+                <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{4F97BAEE-86EE-4FA0-AB72-915C98FF98E4}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Update parallel execution control 3" DTS:refId="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Update parallel execution control 3" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                  <DTS:ObjectData>
+                    <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:ResultType="ResultSetType_SingleRow" SQLTask:SqlStatementSource="EXEC Process.up_UpdateParallelExecutionControl @ExecutionInstanceGUID = ?, @ParallelLegNumber = 3, @KeyCurrentlyBeingProcessed = ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                      <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::ExecutionInstanceGUID" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ExecutionInstanceGUID" SQLTask:ParameterSize="-1" />
+                      <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@KeyCurrentlyBeingProcessed" SQLTask:ParameterSize="-1" />
+                      <SQLTask:ResultBinding SQLTask:DtsVariableName="User::AreAnyParallelLegsStillProcessing" SQLTask:ResultName="AreAnyParallelLegsStillProcessing" />
+                    </SQLTask:SqlTaskData>
+                  </DTS:ObjectData>
+                </DTS:Executable>
+              </DTS:Executables>
+              <DTS:LoggingOptions DTS:LoggingMode="2">
+                <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+              </DTS:LoggingOptions>
+              <DTS:PrecedenceConstraints>
+                <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{0E724364-A5E1-4540-B155-3097D5470096}" DTS:From="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Pause 3" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Pause 3_To_Process Entity 3" DTS:refId="Package\Main Flow\Parallel Leg 3\While more entities to process 3.PrecedenceConstraints[Constraint_Pause 3_To_Process Entity 3]" DTS:To="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3" />
+                <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{F219E52F-0795-401C-BE35-0D6FEAEE0188}" DTS:From="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Process Entity 3" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Process Entity 3_To_Get next entity To process 3" DTS:refId="Package\Main Flow\Parallel Leg 3\While more entities to process 3.PrecedenceConstraints[Constraint_Process Entity 3_To_Get next entity To process 3]" DTS:To="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Get next entity To process 3" />
+                <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{1142A016-1E0E-4A48-803D-E2390082AE0E}" DTS:From="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Get next entity To process 3" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Get next entity To process 3_To_Update parallel execution control 3" DTS:refId="Package\Main Flow\Parallel Leg 3\While more entities to process 3.PrecedenceConstraints[Constraint_Get next entity To process 3_To_Update parallel execution control 3]" DTS:To="Package\Main Flow\Parallel Leg 3\While more entities to process 3\Update parallel execution control 3" />
+              </DTS:PrecedenceConstraints>
+            </DTS:Executable>
+          </DTS:Executables>
+          <DTS:LoggingOptions DTS:LoggingMode="2">
+            <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+          </DTS:LoggingOptions>
+          <DTS:PrecedenceConstraints>
+            <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{626E383A-CF18-4607-9F83-6788922AB45C}" DTS:From="Package\Main Flow\Parallel Leg 3\Get Initial Entity To Process 3" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Get Initial Entity To Process 3_To_Update Parallel Execution Control 3" DTS:refId="Package\Main Flow\Parallel Leg 3.PrecedenceConstraints[Constraint_Get Initial Entity To Process 3_To_Update Parallel Execution Control 3]" DTS:To="Package\Main Flow\Parallel Leg 3\Update Parallel Execution Control 3" />
+            <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{3117F3B2-9162-40FF-9B21-749A7E00C1C4}" DTS:From="Package\Main Flow\Parallel Leg 3\Update Parallel Execution Control 3" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Update Parallel Execution Control 3_To_While more entities to process 3" DTS:refId="Package\Main Flow\Parallel Leg 3.PrecedenceConstraints[Constraint_Update Parallel Execution Control 3_To_While more entities to process 3]" DTS:To="Package\Main Flow\Parallel Leg 3\While more entities to process 3" />
+          </DTS:PrecedenceConstraints>
+          <DTS:PropertyExpression DTS:Name="Disable">@[$Package::NumberOfParallelExecutions] &lt; 3</DTS:PropertyExpression>
+        </DTS:Executable>
+        <DTS:Executable DTS:CreationName="STOCK:SEQUENCE" DTS:DTSID="{1597CFEC-FD97-4506-8D9F-6DCB8EE115B6}" DTS:ExecutableType="STOCK:SEQUENCE" DTS:LocaleID="-1" DTS:ObjectName="Parallel Leg 4" DTS:refId="Package\Main Flow\Parallel Leg 4">
+          <DTS:Variables>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{A5CA89A1-4A32-4312-B91B-5D31396C3CC9}" DTS:IncludeInDebugDump="6789" DTS:Namespace="User" DTS:ObjectName="EntityKey" DTS:RaiseChangedEvent="True">
+              <DTS:VariableValue DTS:DataType="3">-1</DTS:VariableValue>
+            </DTS:Variable>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{B04B0B6E-D104-4A50-9E88-A44209A74E0E}" DTS:IncludeInDebugDump="2345" DTS:Namespace="User" DTS:ObjectName="DependencyEntityToSet" DTS:RaiseChangedEvent="True">
+              <DTS:VariableValue DTS:DataType="8" />
+            </DTS:Variable>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{789AAC40-18CD-49FC-9028-149EE0135ED6}" DTS:IncludeInDebugDump="6789" DTS:Namespace="User" DTS:ObjectName="RowCount" DTS:RaiseChangedEvent="True">
+              <DTS:VariableValue DTS:DataType="3">-1</DTS:VariableValue>
+            </DTS:Variable>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{2FA32B28-89E1-407C-BA1E-2E3A013CF7B1}" DTS:EvaluateAsExpression="True" DTS:Expression="&quot;{\&quot;RowCount\&quot;:&quot;+ (DT_WSTR, 10)@[User::RowCount] + &quot;}&quot;" DTS:IncludeInDebugDump="2345" DTS:Namespace="User" DTS:ObjectName="ResultsJSON">
+              <DTS:VariableValue DTS:DataType="8">{"RowCount":-1}</DTS:VariableValue>
+            </DTS:Variable>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{7A717FF7-D061-4180-A600-E28531C9A7A7}" DTS:IncludeInDebugDump="2345" DTS:Namespace="User" DTS:ObjectName="SqlStatement" DTS:RaiseChangedEvent="True">
+              <DTS:VariableValue DTS:DataType="8" />
+            </DTS:Variable>
+            <DTS:Variable DTS:CreationName="" DTS:DTSID="{CDFC375D-11AD-4AFD-9F74-D1B6676B8CBB}" DTS:IncludeInDebugDump="6789" DTS:Namespace="User" DTS:ObjectName="AreAnyParallelLegsStillProcessing" DTS:RaiseChangedEvent="True">
+              <DTS:VariableValue DTS:DataType="11">True</DTS:VariableValue>
+            </DTS:Variable>
+          </DTS:Variables>
+          <DTS:Executables>
+            <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{2775C0CC-A857-4496-914B-3308092C91B6}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Get Initial Entity To Process 4" DTS:refId="Package\Main Flow\Parallel Leg 4\Get Initial Entity To Process 4" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:LoggingOptions DTS:LoggingMode="2">
+                <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+              </DTS:LoggingOptions>
+              <DTS:ObjectData>
+                <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:ResultType="ResultSetType_SingleRow" SQLTask:SqlStatementSource="EXEC Process.up_GetEntityToProcess ?, 2" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="$Package::EntityGroupKeyCommaSeparatedList" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityGroupKeyCommaSeparatedList" SQLTask:ParameterSize="-1" />
+                  <SQLTask:ResultBinding SQLTask:DtsVariableName="User::EntityKey" SQLTask:ResultName="0" />
+                  <SQLTask:ResultBinding SQLTask:DtsVariableName="User::DependencyEntityToSet" SQLTask:ResultName="1" />
+                  <SQLTask:ResultBinding SQLTask:DtsVariableName="User::SqlStatement" SQLTask:ResultName="2" />
+                </SQLTask:SqlTaskData>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{A5C2D180-27EE-4925-9A85-877DC5F21D4D}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Update Parallel Execution Control 4" DTS:refId="Package\Main Flow\Parallel Leg 4\Update Parallel Execution Control 4" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:ObjectData>
+                <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Process.up_UpdateParallelExecutionControl @ExecutionInstanceGUID = ?, @ParallelLegNumber = 4, @KeyCurrentlyBeingProcessed = ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::ExecutionInstanceGUID" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ExecutionInstanceGUID" SQLTask:ParameterSize="-1" />
+                  <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@KeyCurrentlyBeingProcessed" SQLTask:ParameterSize="-1" />
+                </SQLTask:SqlTaskData>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable DTS:AssignExpression="" DTS:CreationName="STOCK:FORLOOP" DTS:DTSID="{901C5E8F-79F3-44E9-83B2-3245B5E9EBF7}" DTS:EvalExpression="@[User::AreAnyParallelLegsStillProcessing] == True" DTS:ExecutableType="STOCK:FORLOOP" DTS:LocaleID="-1" DTS:ObjectName="While more entities to process 4" DTS:refId="Package\Main Flow\Parallel Leg 4\While more entities to process 4">
+              <DTS:Executables>
+                <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{42A9B2FA-DF14-47AC-8A0D-A8CE8531F7AE}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Pause 4" DTS:refId="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Pause 4" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                  <DTS:ObjectData>
+                    <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="WAITFOR DELAY ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                      <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="$Package::DelayToGetNextEntity" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="0" SQLTask:ParameterSize="8" />
+                    </SQLTask:SqlTaskData>
+                  </DTS:ObjectData>
+                  <DTS:PropertyExpression DTS:Name="Disable">@[User::EntityKey] &gt; 0</DTS:PropertyExpression>
+                </DTS:Executable>
+                <DTS:Executable DTS:CreationName="STOCK:SEQUENCE" DTS:DTSID="{2DA89B13-F19E-482C-AD48-D96AB2EAB7CD}" DTS:ExecutableType="STOCK:SEQUENCE" DTS:LocaleID="-1" DTS:ObjectName="Process Entity 4" DTS:refId="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4">
+                  <DTS:Executables>
+                    <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DelayValidation="True" DTS:DTSID="{050E19AC-F9CF-4F2F-9E27-AD1EA4094332}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Check RowCount 4" DTS:refId="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4\Check RowCount 4" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                      <DTS:EventHandlers>
+                        <DTS:EventHandler DTS:CreationName="OnError" DTS:DTSID="{1D29DF9A-B565-4AEB-8A89-8BCCFE605898}" DTS:EventID="0" DTS:EventName="OnError" DTS:LocaleID="-1" DTS:refId="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4\Check RowCount 4.EventHandlers[OnError]">
+                          <DTS:Variables>
+                            <DTS:Variable DTS:CreationName="" DTS:Description="The propagate property of the event" DTS:DTSID="{CDBB4020-01FB-421A-874F-5F37A2314BF0}" DTS:IncludeInDebugDump="6789" DTS:Namespace="System" DTS:ObjectName="Propagate">
+                              <DTS:VariableValue DTS:DataType="11">True</DTS:VariableValue>
+                            </DTS:Variable>
+                          </DTS:Variables>
+                          <DTS:Executables>
+                            <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{548B1F7C-C078-4016-9213-D50D02777367}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Log Failure 4" DTS:refId="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4\Check RowCount 4.EventHandlers[OnError]\Log Failure 4" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                              <DTS:ObjectData>
+                                <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Process.up_LogSsisError ?, ?, ?, ?, ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                                  <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityKey" SQLTask:ParameterSize="-1" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::PackageName" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@PackageName" SQLTask:ParameterSize="255" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="System::ErrorCode" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ErrorCode" SQLTask:ParameterSize="-1" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::ErrorDescription" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ErrorDescription" SQLTask:ParameterSize="8000" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::SourceName" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@SourceName" SQLTask:ParameterSize="255" />
+                                </SQLTask:SqlTaskData>
+                              </DTS:ObjectData>
+                            </DTS:Executable>
+                            <DTS:Executable DTS:CreationName="Microsoft.ExpressionTask" DTS:DTSID="{702A15BF-DA4D-4083-9D96-1E26E2A828AA}" DTS:ExecutableType="Microsoft.ExpressionTask" DTS:LocaleID="-1" DTS:ObjectName="Disable Propagate" DTS:refId="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4\Check RowCount 4.EventHandlers[OnError]\Disable Propagate" DTS:TaskContact="Expression Task;Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                              <DTS:ObjectData>
+                                <ExpressionTask Expression="@[System::Propagate] = False" />
+                              </DTS:ObjectData>
+                            </DTS:Executable>
+                          </DTS:Executables>
+                          <DTS:PrecedenceConstraints>
+                            <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{ECE5B1FF-9058-42F9-8944-34D4C1DF6F38}" DTS:From="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4\Check RowCount 4.EventHandlers[OnError]\Log Failure 4" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Log Failure 4_To_Disable Propagate" DTS:refId="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4\Check RowCount 4.EventHandlers[OnError].PrecedenceConstraints[Constraint_Log Failure 4_To_Disable Propagate]" DTS:To="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4\Check RowCount 4.EventHandlers[OnError]\Disable Propagate" DTS:Value="2" />
+                          </DTS:PrecedenceConstraints>
+                        </DTS:EventHandler>
+                      </DTS:EventHandlers>
+                      <DTS:ObjectData>
+                        <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="SELECT 0" SQLTask:TimeOut="3600" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                          <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::RowCount" SQLTask:ParameterDirection="Output" SQLTask:ParameterName="0" SQLTask:ParameterSize="-1" />
+                        </SQLTask:SqlTaskData>
+                      </DTS:ObjectData>
+                      <DTS:PropertyExpression DTS:Name="SqlStatementSource">@[User::SqlStatement]</DTS:PropertyExpression>
+                    </DTS:Executable>
+                    <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:Disabled="True" DTS:DTSID="{2ED987CA-776C-4E04-A561-552FD24DE871}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Notify Users 4" DTS:refId="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4\Notify Users 4" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                      <DTS:EventHandlers>
+                        <DTS:EventHandler DTS:CreationName="OnError" DTS:DTSID="{C9607C44-53A6-4B69-9BDA-CE7435EE5F10}" DTS:EventID="0" DTS:EventName="OnError" DTS:LocaleID="-1" DTS:refId="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4\Notify Users 4.EventHandlers[OnError]">
+                          <DTS:Variables>
+                            <DTS:Variable DTS:CreationName="" DTS:Description="The propagate property of the event" DTS:DTSID="{07F39F0B-1BCF-4EBF-8B17-DB86B591BF13}" DTS:IncludeInDebugDump="6789" DTS:Namespace="System" DTS:ObjectName="Propagate">
+                              <DTS:VariableValue DTS:DataType="11">True</DTS:VariableValue>
+                            </DTS:Variable>
+                          </DTS:Variables>
+                          <DTS:Executables>
+                            <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{18BC1E27-492C-4BA2-836E-B437B572A2DD}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Log Failure 4" DTS:refId="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4\Notify Users 4.EventHandlers[OnError]\Log Failure 4" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                              <DTS:ObjectData>
+                                <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Process.up_LogSsisError ?, ?, ?, ?, ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                                  <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityKey" SQLTask:ParameterSize="-1" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::PackageName" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@PackageName" SQLTask:ParameterSize="255" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="System::ErrorCode" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ErrorCode" SQLTask:ParameterSize="-1" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::ErrorDescription" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ErrorDescription" SQLTask:ParameterSize="8000" />
+                                  <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::SourceName" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@SourceName" SQLTask:ParameterSize="255" />
+                                </SQLTask:SqlTaskData>
+                              </DTS:ObjectData>
+                            </DTS:Executable>
+                            <DTS:Executable DTS:CreationName="Microsoft.ExpressionTask" DTS:DTSID="{73BAD665-4127-4E19-BF19-BFBD24B7BB31}" DTS:ExecutableType="Microsoft.ExpressionTask" DTS:LocaleID="-1" DTS:ObjectName="Disable Propagate" DTS:refId="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4\Notify Users 4.EventHandlers[OnError]\Disable Propagate" DTS:TaskContact="Expression Task;Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                              <DTS:ObjectData>
+                                <ExpressionTask Expression="@[System::Propagate] = False" />
+                              </DTS:ObjectData>
+                            </DTS:Executable>
+                          </DTS:Executables>
+                          <DTS:PrecedenceConstraints>
+                            <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{4179BBC7-4133-492C-B262-D868C93CA1DC}" DTS:From="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4\Notify Users 4.EventHandlers[OnError]\Log Failure 4" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Log Failure 4_To_Disable Propagate" DTS:refId="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4\Notify Users 4.EventHandlers[OnError].PrecedenceConstraints[Constraint_Log Failure 4_To_Disable Propagate]" DTS:To="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4\Notify Users 4.EventHandlers[OnError]\Disable Propagate" DTS:Value="2" />
+                          </DTS:PrecedenceConstraints>
+                        </DTS:EventHandler>
+                      </DTS:EventHandlers>
+                      <DTS:ObjectData>
+                        <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Process.up_NotifyDataValidationError ?, ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                          <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityKey" SQLTask:ParameterSize="-1" />
+                          <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::RowCount" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@RowCount" SQLTask:ParameterSize="-1" />
+                        </SQLTask:SqlTaskData>
+                      </DTS:ObjectData>
+                      <DTS:PropertyExpression DTS:Name="Disable">@[User::RowCount] == 0</DTS:PropertyExpression>
+                    </DTS:Executable>
+                    <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{D56403DA-3A33-42DD-BAD4-5A789B9495ED}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Set entity processing status 4" DTS:refId="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4\Set entity processing status 4" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                      <DTS:ObjectData>
+                        <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Process.up_SetEntityProcessingSuccess ?, ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                          <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityKey" SQLTask:ParameterSize="-1" />
+                          <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="User::ResultsJSON" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ResultsJSON" SQLTask:ParameterSize="8000" />
+                        </SQLTask:SqlTaskData>
+                      </DTS:ObjectData>
+                    </DTS:Executable>
+                    <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{D3B22DCC-AB7C-463B-B45D-F7DBEFD1A381}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Set dependency 4" DTS:refId="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4\Set dependency 4" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                      <DTS:ObjectData>
+                        <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Dependency.up_SetReadyStatus ?, ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                          <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="User::DependencyEntityToSet" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityCode" SQLTask:ParameterSize="-1" />
+                          <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::ExecutionInstanceGUID" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@PackageExecutionID" SQLTask:ParameterSize="-1" />
+                        </SQLTask:SqlTaskData>
+                      </DTS:ObjectData>
+                      <DTS:PropertyExpression DTS:Name="Disable">LEN(@[User::DependencyEntityToSet]) == 0</DTS:PropertyExpression>
+                    </DTS:Executable>
+                  </DTS:Executables>
+                  <DTS:LoggingOptions DTS:LoggingMode="2">
+                    <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+                  </DTS:LoggingOptions>
+                  <DTS:PrecedenceConstraints>
+                    <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{6ACD80ED-810F-47FC-AB76-8DBE1E12839E}" DTS:From="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4\Check RowCount 4" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Check RowCount 4_To_Notify Users 4" DTS:refId="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4.PrecedenceConstraints[Constraint_Check RowCount 4_To_Notify Users 4]" DTS:To="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4\Notify Users 4" />
+                    <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{2D693BFE-4A76-488A-927A-389BC8FED95A}" DTS:From="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4\Notify Users 4" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Notify Users 4_To_Set entity processing status 4" DTS:refId="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4.PrecedenceConstraints[Constraint_Notify Users 4_To_Set entity processing status 4]" DTS:To="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4\Set entity processing status 4" />
+                    <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{63386654-87BB-4C1E-89C5-1DDDE18FC722}" DTS:From="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4\Set entity processing status 4" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Set entity processing status 4_To_Set dependency 4" DTS:refId="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4.PrecedenceConstraints[Constraint_Set entity processing status 4_To_Set dependency 4]" DTS:To="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4\Set dependency 4" />
+                  </DTS:PrecedenceConstraints>
+                  <DTS:PropertyExpression DTS:Name="Disable">@[User::EntityKey] == 0</DTS:PropertyExpression>
+                </DTS:Executable>
+                <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{838C0EA4-C8C7-478B-ACBC-74C5AA2E142C}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Get next entity To process 4" DTS:refId="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Get next entity To process 4" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                  <DTS:LoggingOptions DTS:LoggingMode="2">
+                    <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+                  </DTS:LoggingOptions>
+                  <DTS:ObjectData>
+                    <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:ResultType="ResultSetType_SingleRow" SQLTask:SqlStatementSource="EXEC Process.up_GetEntityToProcess ?, 2" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                      <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="$Package::EntityGroupKeyCommaSeparatedList" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityGroupKeyCommaSeparatedList" SQLTask:ParameterSize="-1" />
+                      <SQLTask:ResultBinding SQLTask:DtsVariableName="User::EntityKey" SQLTask:ResultName="0" />
+                      <SQLTask:ResultBinding SQLTask:DtsVariableName="User::DependencyEntityToSet" SQLTask:ResultName="1" />
+                      <SQLTask:ResultBinding SQLTask:DtsVariableName="User::SqlStatement" SQLTask:ResultName="2" />
+                    </SQLTask:SqlTaskData>
+                  </DTS:ObjectData>
+                </DTS:Executable>
+                <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{833A18DF-1D42-4416-AEE8-F3B834F19B56}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Update parallel execution control 4" DTS:refId="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Update parallel execution control 4" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+                  <DTS:ObjectData>
+                    <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:ResultType="ResultSetType_SingleRow" SQLTask:SqlStatementSource="EXEC Process.up_UpdateParallelExecutionControl @ExecutionInstanceGUID = ?, @ParallelLegNumber = 4, @KeyCurrentlyBeingProcessed = ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+                      <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::ExecutionInstanceGUID" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@ExecutionInstanceGUID" SQLTask:ParameterSize="-1" />
+                      <SQLTask:ParameterBinding SQLTask:DataType="3" SQLTask:DtsVariableName="User::EntityKey" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@KeyCurrentlyBeingProcessed" SQLTask:ParameterSize="-1" />
+                      <SQLTask:ResultBinding SQLTask:DtsVariableName="User::AreAnyParallelLegsStillProcessing" SQLTask:ResultName="AreAnyParallelLegsStillProcessing" />
+                    </SQLTask:SqlTaskData>
+                  </DTS:ObjectData>
+                </DTS:Executable>
+              </DTS:Executables>
+              <DTS:LoggingOptions DTS:LoggingMode="2">
+                <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+              </DTS:LoggingOptions>
+              <DTS:PrecedenceConstraints>
+                <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{DF2ABB2A-539C-48AF-B1A7-34A23E41BC04}" DTS:From="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Pause 4" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Pause 4_To_Process Entity 4" DTS:refId="Package\Main Flow\Parallel Leg 4\While more entities to process 4.PrecedenceConstraints[Constraint_Pause 4_To_Process Entity 4]" DTS:To="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4" />
+                <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{AD938CE7-5D2D-4CAC-A8FF-25C2BB10AB71}" DTS:From="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Process Entity 4" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Process Entity 4_To_Get next entity To process 4" DTS:refId="Package\Main Flow\Parallel Leg 4\While more entities to process 4.PrecedenceConstraints[Constraint_Process Entity 4_To_Get next entity To process 4]" DTS:To="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Get next entity To process 4" />
+                <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{832E1F17-0A2C-4ADE-8933-056D786B5B95}" DTS:From="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Get next entity To process 4" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Get next entity To process 4_To_Update parallel execution control 4" DTS:refId="Package\Main Flow\Parallel Leg 4\While more entities to process 4.PrecedenceConstraints[Constraint_Get next entity To process 4_To_Update parallel execution control 4]" DTS:To="Package\Main Flow\Parallel Leg 4\While more entities to process 4\Update parallel execution control 4" />
+              </DTS:PrecedenceConstraints>
+            </DTS:Executable>
+          </DTS:Executables>
+          <DTS:LoggingOptions DTS:LoggingMode="2">
+            <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+          </DTS:LoggingOptions>
+          <DTS:PrecedenceConstraints>
+            <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{52ACD694-EA17-4291-A419-128838B23D7A}" DTS:From="Package\Main Flow\Parallel Leg 4\Get Initial Entity To Process 4" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Get Initial Entity To Process 4_To_Update Parallel Execution Control 4" DTS:refId="Package\Main Flow\Parallel Leg 4.PrecedenceConstraints[Constraint_Get Initial Entity To Process 4_To_Update Parallel Execution Control 4]" DTS:To="Package\Main Flow\Parallel Leg 4\Update Parallel Execution Control 4" />
+            <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{F79D1D9E-43C6-4546-9C1B-126165921607}" DTS:From="Package\Main Flow\Parallel Leg 4\Update Parallel Execution Control 4" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Update Parallel Execution Control 4_To_While more entities to process 4" DTS:refId="Package\Main Flow\Parallel Leg 4.PrecedenceConstraints[Constraint_Update Parallel Execution Control 4_To_While more entities to process 4]" DTS:To="Package\Main Flow\Parallel Leg 4\While more entities to process 4" />
+          </DTS:PrecedenceConstraints>
+          <DTS:PropertyExpression DTS:Name="Disable">@[$Package::NumberOfParallelExecutions] &lt; 4</DTS:PropertyExpression>
+        </DTS:Executable>
+      </DTS:Executables>
+      <DTS:LoggingOptions DTS:LoggingMode="2">
+        <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+      </DTS:LoggingOptions>
+      <DTS:PropertyExpression DTS:Name="Disable">@[User::CountOfEntitiesStillToProcess] == 0</DTS:PropertyExpression>
+    </DTS:Executable>
+    <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{4BFCB495-6A1D-4446-BD6C-29764F8BD9F6}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Reset IsProcessing Flag" DTS:refId="Package\Reset IsProcessing Flag" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+      <DTS:LoggingOptions DTS:LoggingMode="2">
+        <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+      </DTS:LoggingOptions>
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Process.up_ResetIsProcessingFlag ?, 2" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="$Package::EntityGroupKeyCommaSeparatedList" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="0" SQLTask:ParameterSize="-1" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{0CE741FB-F3DA-4B14-896A-7FFE32C40231}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Cleanup Parallel Execution Control" DTS:refId="Package\Cleanup Parallel Execution Control" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="DELETE Process.ParallelExecutionControl WHERE ExecutionInstanceGUID = ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::ExecutionInstanceGUID" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="0" SQLTask:ParameterSize="-1" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable DTS:CreationName="STOCK:SEQUENCE" DTS:DTSID="{D1B136D1-2DAA-4FE0-A4E7-6A3120F00B7E}" DTS:ExecutableType="STOCK:SEQUENCE" DTS:LocaleID="-1" DTS:ObjectName="Reset Schedule if all done" DTS:refId="Package\Reset Schedule if all done">
+      <DTS:Executables>
+        <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{CD221D14-7C44-47F1-9400-B20FFCA1EE47}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Check if all entities have processed" DTS:refId="Package\Reset Schedule if all done\Check if all entities have processed" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+          <DTS:LoggingOptions DTS:LoggingMode="2">
+            <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+          </DTS:LoggingOptions>
+          <DTS:ObjectData>
+            <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:ResultType="ResultSetType_SingleRow" SQLTask:SqlStatementSource="EXEC Process.up_AreThereAnyEntitiesToProcess ?, 2" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+              <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="$Package::EntityGroupKeyCommaSeparatedList" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityGroupKeyCommaSeparatedList" SQLTask:ParameterSize="-1" />
+              <SQLTask:ResultBinding SQLTask:DtsVariableName="User::CountOfEntitiesStillToProcess" SQLTask:ResultName="0" />
+            </SQLTask:SqlTaskData>
+          </DTS:ObjectData>
+        </DTS:Executable>
+        <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:Disabled="True" DTS:DTSID="{13D46B62-BEE8-40C3-90DF-0AB920A84551}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Set Schedule Date to tomorrow" DTS:refId="Package\Reset Schedule if all done\Set Schedule Date to tomorrow" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+          <DTS:ObjectData>
+            <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="User::SetScheduleDateSql" SQLTask:SqlStmtSourceType="Variable" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+          </DTS:ObjectData>
+          <DTS:PropertyExpression DTS:Name="Disable">@[$Package::ScheduleName] == ""</DTS:PropertyExpression>
+        </DTS:Executable>
+        <DTS:Executable DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:DTSID="{430985D7-6EF7-48FD-AF87-855496E6B771}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Set Ready Status" DTS:refId="Package\Reset Schedule if all done\Set Ready Status" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+          <DTS:LoggingOptions DTS:LoggingMode="2">
+            <DTS:Property DTS:DataType="8" DTS:Name="EventFilter" />
+          </DTS:LoggingOptions>
+          <DTS:ObjectData>
+            <SQLTask:SqlTaskData SQLTask:Connection="EtlDB" SQLTask:SqlStatementSource="EXEC Dependency.up_SetReadyStatus ?, ?" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+              <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="$Package::EntityToSetForDataIsReady" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@EntityCode" SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding SQLTask:DataType="129" SQLTask:DtsVariableName="System::ExecutionInstanceGUID" SQLTask:ParameterDirection="Input" SQLTask:ParameterName="@PackageExecutionID" SQLTask:ParameterSize="-1" />
+            </SQLTask:SqlTaskData>
+          </DTS:ObjectData>
+        </DTS:Executable>
+      </DTS:Executables>
+      <DTS:PrecedenceConstraints>
+        <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{75C075A6-05BA-4031-AEDB-8D220C328D06}" DTS:EvalOp="3" DTS:Expression="@[User::CountOfEntitiesStillToProcess] == 0" DTS:From="Package\Reset Schedule if all done\Check if all entities have processed" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Check if all entities have processed_To_Set Schedule Date to tomorrow" DTS:refId="Package\Reset Schedule if all done.PrecedenceConstraints[Constraint_Check if all entities have processed_To_Set Schedule Date to tomorrow]" DTS:To="Package\Reset Schedule if all done\Set Schedule Date to tomorrow" />
+        <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{8DDF512C-EFD5-4E68-95D5-C8BCA49F551B}" DTS:EvalOp="3" DTS:Expression="!ISNULL(@[$Package::EntityToSetForDataIsReady]) &amp;&amp; @[$Package::EntityToSetForDataIsReady] != &quot;&quot;" DTS:From="Package\Reset Schedule if all done\Set Schedule Date to tomorrow" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Set Schedule Date to tomorrow_To_Set Ready Status" DTS:refId="Package\Reset Schedule if all done.PrecedenceConstraints[Constraint_Set Schedule Date to tomorrow_To_Set Ready Status]" DTS:To="Package\Reset Schedule if all done\Set Ready Status" DTS:Value="2" />
+      </DTS:PrecedenceConstraints>
+    </DTS:Executable>
+  </DTS:Executables>
+  <DTS:PrecedenceConstraints>
+    <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{F399AC80-557B-44C6-84E2-654CD71B74E8}" DTS:From="Package\Are there any entities to Process?" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Are there any entities to Process?_To_Main Flow" DTS:refId="Package.PrecedenceConstraints[Constraint_Are there any entities to Process?_To_Main Flow]" DTS:To="Package\Main Flow" />
+    <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{852D3B5E-7F5C-4ED0-A642-752905722736}" DTS:From="Package\Main Flow" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Main Flow_To_Reset IsProcessing Flag" DTS:refId="Package.PrecedenceConstraints[Constraint_Main Flow_To_Reset IsProcessing Flag]" DTS:To="Package\Reset IsProcessing Flag" />
+    <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{F8A61C3C-D39A-48CD-9F50-228C635A5E2A}" DTS:From="Package\Reset IsProcessing Flag" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Reset IsProcessing Flag_To_Cleanup Parallel Execution Control" DTS:refId="Package.PrecedenceConstraints[Constraint_Reset IsProcessing Flag_To_Cleanup Parallel Execution Control]" DTS:To="Package\Cleanup Parallel Execution Control" />
+    <DTS:PrecedenceConstraint DTS:CreationName="" DTS:DTSID="{61A10267-A907-4A06-B502-F2B375B9282F}" DTS:From="Package\Cleanup Parallel Execution Control" DTS:LogicalAnd="True" DTS:ObjectName="Constraint_Cleanup Parallel Execution Control_To_Reset Schedule if all done" DTS:refId="Package.PrecedenceConstraints[Constraint_Cleanup Parallel Execution Control_To_Reset Schedule if all done]" DTS:To="Package\Reset Schedule if all done" />
+  </DTS:PrecedenceConstraints>
+  <DTS:DesignTimeProperties><![CDATA[<?xml version="1.0"?>
+<!--This CDATA section contains the layout information of the package. The section includes information such as (x,y) coordinates, width, and height.-->
+<!--If you manually edit this section and make a mistake, you can delete it. -->
+<!--The package will still be able to load normally but the previous layout information will be lost and the designer will automatically re-arrange the elements on the design surface.-->
+<Objects
+  Version="8">
+  <!--Each node below will contain properties that do not affect runtime behavior.-->
+  <Package
+    design-time-name="Package">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="4" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph" xmlns:mssge="clr-namespace:Microsoft.SqlServer.Graph.Extended;assembly=Microsoft.SqlServer.IntegrationServices.Graph" xmlns:av="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+        <AnnotationLayout
+          Text="DON'T CHANGE THIS SSIS PACKAGE MANUALLY. CHANGE THE BIML FILE INSTEAD"
+          ParentId="Package"
+          Size="400,50"
+          Id="1abe1c99-85c9-4caa-aab3-e45b603d53f4"
+          TopLeft="10,10">
+          <AnnotationLayout.FontInfo>
+            <mssge:FontInfo
+              Family="Tahoma"
+              Size="20"
+              Color="#FF000000"
+              Weight="Bold">
+              <mssge:FontInfo.TextDecorations>
+                <av:TextDecorationCollection />
+              </mssge:FontInfo.TextDecorations>
+            </mssge:FontInfo>
+          </AnnotationLayout.FontInfo>
+        </AnnotationLayout>
+      </GraphLayout>
+    </LayoutInfo>
+  </Package>
+</Objects>]]></DTS:DesignTimeProperties>
+</DTS:Executable>

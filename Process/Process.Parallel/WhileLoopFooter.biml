@@ -1,0 +1,22 @@
+﻿<ExecuteSQL Name="Get next entity To process <#= i.ToString() #>" LoggingMode="Disabled" ConnectionName="EtlDB" ResultSet="SingleRow">
+    <Results>
+        <Result Name="0" VariableName="User.EntityKey" />
+        <Result Name="1" VariableName="User.DependencyEntityToSet" />
+        <Result Name="2" VariableName="User.SqlStatement" />
+    </Results>
+    <Parameters>
+        <Parameter Name="@EntityGroupKeyCommaSeparatedList" VariableName="EntityGroupKeyCommaSeparatedList" Length="-1" DataType="AnsiString" />
+    </Parameters>
+    <DirectInput>EXEC Process.up_GetEntityToProcess ?, <#= processTypeKey #></DirectInput>
+</ExecuteSQL>
+
+<ExecuteSQL Name="Update parallel execution control <#= i.ToString() #>" ConnectionName="EtlDB" ResultSet="SingleRow">
+    <Results>
+        <Result Name="AreAnyParallelLegsStillProcessing" VariableName="User.AreAnyParallelLegsStillProcessing" />
+    </Results>
+    <Parameters>
+        <Parameter Name="@ExecutionInstanceGUID" VariableName="System.ExecutionInstanceGUID" Length="-1" DataType="AnsiString" />
+        <Parameter Name="@KeyCurrentlyBeingProcessed" VariableName="User.EntityKey" Length="-1" DataType="Int32" />
+    </Parameters>
+    <DirectInput>EXEC Process.up_UpdateParallelExecutionControl @ExecutionInstanceGUID = ?, @ParallelLegNumber = <#= i.ToString() #>, @KeyCurrentlyBeingProcessed = ?</DirectInput>
+</ExecuteSQL>

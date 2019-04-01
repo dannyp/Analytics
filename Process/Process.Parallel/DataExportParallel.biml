@@ -1,0 +1,563 @@
+﻿<#
+var packageName = "DataExportParallel";
+var processTypeKey = "3";
+var numberOfLegs = 4;
+#>
+
+<Biml xmlns="http://schemas.varigence.com/biml.xsd">
+    <#=CallBimlScript("ProjectHeader.biml", packageName)#>
+    <Packages>
+        <Package Name="<#= packageName #>" >
+            <Parameters>
+                <Parameter Name="DelayToGetNextEntity" DataType="String">00:00:30</Parameter>
+                <Parameter Name="EntityGroupKeyCommaSeparatedList" DataType="String">4</Parameter>
+                <Parameter Name="EntityToSetForDataIsReady" DataType="String"></Parameter>
+                <Parameter Name="NumberOfParallelExecutions" DataType="Int32">2</Parameter>
+                <Parameter Name="ScheduleName" DataType="String"></Parameter>
+            </Parameters>
+            <Variables>
+                <Variable Name="CountOfEntitiesStillToProcess" DataType="Int32" IncludeInDebugDump="Include" RaiseChangedEvent="true">-1</Variable>
+                <Variable Name="SetScheduleDateSql" DataType="String" IncludeInDebugDump="Exclude" EvaluateAsExpression="true">&quot;EXEC Process.up_SetScheduleStartDate &apos;&quot; + @[$Package::ScheduleName]+ &quot;&apos;;&quot;</Variable>
+            </Variables>
+            <SsisAnnotations>
+                <SsisAnnotation FontSize="20" FontStyle="Bold" Width="400" X="10" Y="10">DON'T CHANGE THIS SSIS PACKAGE MANUALLY. CHANGE THE BIML FILE INSTEAD</SsisAnnotation>
+            </SsisAnnotations>                    
+            <Tasks>
+                <#@ include file="TasksHeader.biml" #>
+                
+                <Container Name="Main Flow" LoggingMode="Disabled">
+                    <PrecedenceConstraints>
+                        <Inputs>
+                            <Input OutputPathName="Are there any entities to Process?.Output" />
+                        </Inputs>
+                    </PrecedenceConstraints>
+                    <Expressions>
+                        <Expression ExternalProperty="Disable">@[User::CountOfEntitiesStillToProcess] == 0</Expression>
+                    </Expressions>
+                    <Tasks>
+                        <#@ include file="MainFlowHeader.biml" #>
+
+                        <# for (int i = 1; i <= numberOfLegs; i++) { #>
+                            <Container Name="Parallel Leg <#= i.ToString() #>" LoggingMode="Disabled" ConstraintMode="LinearOnSuccess">
+                                <Variables>
+                                    <Variable Name="EntityKey" DataType="Int32" IncludeInDebugDump="Include" RaiseChangedEvent="true">-1</Variable>
+                                    <Variable Name="DependencyEntityToSet" DataType="String" IncludeInDebugDump="Exclude" RaiseChangedEvent="true"></Variable>
+                                    <Variable Name="SqlStatement" DataType="String" IncludeInDebugDump="Exclude" RaiseChangedEvent="true"></Variable>
+                                    <Variable Name="ExitStatus" DataType="Int32" IncludeInDebugDump="Include">0</Variable>
+                                    <Variable Name="AreAnyParallelLegsStillProcessing" DataType="Boolean" IncludeInDebugDump="Include" RaiseChangedEvent="true">True</Variable>
+                                </Variables>
+                                <Expressions>
+                                    <Expression ExternalProperty="Disable">@[$Package::NumberOfParallelExecutions] &lt; <#= i.ToString() #></Expression>
+                                </Expressions>             
+                                <Tasks>
+                                    <ExecuteSQL Name="Get Initial Entity To Process <#= i.ToString() #>" LoggingMode="Disabled" ConnectionName="EtlDB" ResultSet="SingleRow">
+                                        <Results>
+                                            <Result Name="0" VariableName="User.EntityKey" />
+                                            <Result Name="1" VariableName="User.DependencyEntityToSet" />
+                                            <Result Name="2" VariableName="User.SqlStatement" />
+                                        </Results>
+                                        <Parameters>
+                                            <Parameter Name="@EntityGroupKeyCommaSeparatedList" VariableName="EntityGroupKeyCommaSeparatedList" Length="-1" DataType="AnsiString" />
+                                        </Parameters>
+                                        <DirectInput>EXEC Process.up_GetEntityToProcess ?, <#= processTypeKey #></DirectInput>
+                                    </ExecuteSQL>
+                                    
+                                    <ExecuteSQL Name="Update Parallel Execution Control <#= i.ToString() #>" ConnectionName="EtlDB">
+                                        <Parameters>
+                                            <Parameter Name="@ExecutionInstanceGUID" VariableName="System.ExecutionInstanceGUID" Length="-1" DataType="AnsiString" />
+                                            <Parameter Name="@KeyCurrentlyBeingProcessed" VariableName="User.EntityKey" Length="-1" DataType="Int32" />
+                                        </Parameters>
+                                        <DirectInput>EXEC Process.up_UpdateParallelExecutionControl @ExecutionInstanceGUID = ?, @ParallelLegNumber = <#= i.ToString() #>, @KeyCurrentlyBeingProcessed = ?</DirectInput>
+                                    </ExecuteSQL>
+
+                                    <ForLoop Name="While more entities to process <#= i.ToString() #>" LoggingMode="Disabled" ConstraintMode="LinearOnSuccess">
+                                        <Tasks>
+                                            <ExecuteSQL Name="Pause <#= i.ToString() #>" ConnectionName="EtlDB">
+                                                <Expressions>
+                                                    <Expression ExternalProperty="Disable">@[User::EntityKey] &gt; 0</Expression>
+                                                </Expressions>
+                                                <Parameters>
+                                                    <Parameter Name="0" VariableName="DelayToGetNextEntity" Length="8" DataType="AnsiString" />
+                                                </Parameters>
+                                                <DirectInput>WAITFOR DELAY ?</DirectInput>
+                                            </ExecuteSQL>
+                                            
+                                            <Container Name="Process Entity <#= i.ToString() #>" LoggingMode="Disabled" ConstraintMode="LinearOnSuccess">
+                                                <Expressions>
+                                                    <Expression ExternalProperty="Disable">@[User::EntityKey] == 0</Expression>
+                                                </Expressions>                                                
+                                                <Tasks>
+                                                    <#@ include file="ProcessEntityHeader.biml" #>
+                                                
+                                                    <!--
+                                                    *******************************************************************************************************************
+                                                    ********************************************** CUSTOM CODE GOES HERE **********************************************
+                                                    *******************************************************************************************************************
+                                                    -->
+                                                
+                                                    <Script Name="Script Task">
+                                                        <ScriptTaskProjectReference ScriptTaskProjectName="ST_e84d3efe1238416f94bae306757a6f54" />
+                                                    </Script>
+                                                    
+                                                    <ExecuteSQL Name="Set to complete and Notify" ConnectionName="EtlDB">
+                                                        <Expressions>
+                                                            <Expression ExternalProperty="Disable">@[User::ExitStatus] != 0</Expression>
+                                                        </Expressions>
+                                                        <Parameters>
+                                                            <Parameter Name="@EntityKey" VariableName="User.EntityKey" Length="-1" DataType="Int32" />
+                                                        </Parameters>
+                                                        <DirectInput>EXEC DataExport.up_NotifyDataExportComplete ?</DirectInput>
+                                                    </ExecuteSQL>
+                                                    
+                                                    <#@ include file="ProcessEntityFooter.biml" #>
+                                                </Tasks>
+                                            </Container>
+
+                                            <#@ include file="WhileLoopFooter.biml" #>
+                                        </Tasks>
+                                        <LoopTestExpression>@[User::AreAnyParallelLegsStillProcessing] == True</LoopTestExpression>
+                                    </ForLoop>                                        
+                                        
+                                </Tasks>
+                            </Container>
+                        <# }; #>
+                    </Tasks>
+                </Container>
+                
+                <#@ include file="PackageFooter.biml" #>
+
+            </Tasks>
+        </Package>
+    </Packages>
+    <ScriptProjects>
+        <ScriptTaskProject Name="ST_e84d3efe1238416f94bae306757a6f54" VstaMajorVersion="0">
+            <AssemblyReferences>
+                <AssemblyReference AssemblyPath="System" />
+                <AssemblyReference AssemblyPath="System.Data" />
+                <AssemblyReference AssemblyPath="System.Windows.Forms" />
+                <AssemblyReference AssemblyPath="System.Xml" />
+                <AssemblyReference AssemblyPath="Microsoft.SqlServer.ManagedDTS.dll" />
+                <AssemblyReference AssemblyPath="Microsoft.SqlServer.ScriptTask.dll" />
+            </AssemblyReferences>
+            <Files>
+                <File Path="ScriptMain.cs">   #region Help:  Introduction to the script task
+/* The Script Task allows you to perform virtually any operation that can be accomplished in
+ * a .Net application within the context of an Integration Services control flow. 
+ * 
+ * Expand the other regions which have &quot;Help&quot; prefixes for examples of specific ways to use
+ * Integration Services features within this script task. */
+#endregion
+
+
+#region Namespaces
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.IO;
+using System.Net;
+using System.Text;
+using System.Text.RegularExpressions;
+#endregion
+
+namespace ST_32cc1158d28c41d396a82f292ab5a74a
+{
+
+    /// &lt;summary&gt;
+    /// ScriptMain is the entry point class of the script.  Do not change the name, attributes,
+    /// or parent of this class.
+    /// &lt;/summary&gt;
+    [Microsoft.SqlServer.Dts.Tasks.ScriptTask.SSISScriptTaskEntryPointAttribute]
+    public partial class ScriptMain : Microsoft.SqlServer.Dts.Tasks.ScriptTask.VSTARTScriptObjectModelBase
+    {
+        #region Help:  Using Integration Services variables and parameters in a script
+        /* To use a variable in this script, first ensure that the variable has been added to 
+         * either the list contained in the ReadOnlyVariables property or the list contained in 
+         * the ReadWriteVariables property of this script task, according to whether or not your
+         * code needs to write to the variable.  To add the variable, save this script, close this instance of
+         * Visual Studio, and update the ReadOnlyVariables and 
+         * ReadWriteVariables properties in the Script Transformation Editor window.
+         * To use a parameter in this script, follow the same steps. Parameters are always read-only.
+         * 
+         * Example of reading from a variable:
+         *  DateTime startTime = (DateTime) Dts.Variables[&quot;System::StartTime&quot;].Value;
+         * 
+         * Example of writing to a variable:
+         *  Dts.Variables[&quot;User::myStringVariable&quot;].Value = &quot;new value&quot;;
+         * 
+         * Example of reading from a package parameter:
+         *  int batchId = (int) Dts.Variables[&quot;$Package::batchId&quot;].Value;
+         *  
+         * Example of reading from a project parameter:
+         *  int batchId = (int) Dts.Variables[&quot;$Project::batchId&quot;].Value;
+         * 
+         * Example of reading from a sensitive project parameter:
+         *  int batchId = (int) Dts.Variables[&quot;$Project::batchId&quot;].GetSensitiveValue();
+         * */
+
+        #endregion
+
+        #region Help:  Firing Integration Services events from a script
+        /* This script task can fire events for logging purposes.
+         * 
+         * Example of firing an error event:
+         *  Dts.Events.FireError(18, &quot;Process Values&quot;, &quot;Bad value&quot;, &quot;&quot;, 0);
+         * 
+         * Example of firing an information event:
+         *  Dts.Events.FireInformation(3, &quot;Process Values&quot;, &quot;Processing has started&quot;, &quot;&quot;, 0, ref fireAgain)
+         * 
+         * Example of firing a warning event:
+         *  Dts.Events.FireWarning(14, &quot;Process Values&quot;, &quot;No values received for input&quot;, &quot;&quot;, 0);
+         * */
+        #endregion
+
+        #region Help:  Using Integration Services connection managers in a script
+        /* Some types of connection managers can be used in this script task.  See the topic 
+         * &quot;Working with Connection Managers Programatically&quot; for details.
+         * 
+         * Example of using an ADO.Net connection manager:
+         *  object rawConnection = Dts.Connections[&quot;Sales DB&quot;].AcquireConnection(Dts.Transaction);
+         *  SqlConnection myADONETConnection = (SqlConnection)rawConnection;
+         *  //Use the connection in some code here, then release the connection
+         *  Dts.Connections[&quot;Sales DB&quot;].ReleaseConnection(rawConnection);
+         *
+         * Example of using a File connection manager
+         *  object rawConnection = Dts.Connections[&quot;Prices.zip&quot;].AcquireConnection(Dts.Transaction);
+         *  string filePath = (string)rawConnection;
+         *  //Use the connection in some code here, then release the connection
+         *  Dts.Connections[&quot;Prices.zip&quot;].ReleaseConnection(rawConnection);
+         * */
+        #endregion
+
+        const string CONNECTION_MANAGER_NAME = &quot;EtlDB_ADO&quot;;
+        const int TIMEOUT_HOUR = 1000 * 60 * 60;
+        private const string DEFAULT_DATE_FORMAT = &quot;yyyy-MM-dd&quot;;
+
+        /// &lt;summary&gt;
+        /// This method is called when this script task executes in the control flow.
+        /// Before returning from this method, set the value of Dts.TaskResult to indicate success or failure.
+        /// To open Help, press F1.
+        /// &lt;/summary&gt;
+        public void Main()
+        {
+            // User::CommandToExecute, User::EntityKey, User::EntityTypeName, User::FileDestination
+            string command = (string)Dts.Variables[&quot;User::CommandToExecute&quot;].Value;
+            string destination = (string)Dts.Variables[&quot;User::FileDestination&quot;].Value;
+            string entityType = (string)Dts.Variables[&quot;User::EntityTypeName&quot;].Value;
+            int entityKey = (int)Dts.Variables[&quot;User::EntityKey&quot;].Value;
+            string delimiterString = (string)Dts.Variables[&quot;User::Delimiter&quot;].Value;
+            bool includeFileHeader = Boolean.Parse(Dts.Variables[&quot;User::IncludeFileHeader&quot;].Value.ToString());
+
+            // If delimiterString is NULL or empty, use a default of comma
+            char delimiter = (delimiterString == null || delimiterString == &quot;&quot; ? Convert.ToChar(&quot;,&quot;) : Convert.ToChar(delimiterString));
+
+            // Reset exit status
+            Dts.Variables[&quot;User::ExitStatus&quot;].Value = 0;
+
+            // Add timestamp 
+            destination = ReplaceTimestamps(destination);
+
+            // Make sure the filename does not contain invalid characters
+            destination = SanitiseFilename(destination);
+
+            try
+            {
+                switch (entityType)
+                {
+                    case &quot;Report&quot;:
+                        DownloadReport(command, destination);
+                        break;
+                    case &quot;XML&quot;:
+                        var result = FetchScalarAsString(CONNECTION_MANAGER_NAME, command);
+                        SaveXML(result, destination);
+                        break;
+                    case &quot;Delimited&quot;:
+                        var table = FetchDataTable(CONNECTION_MANAGER_NAME, command);
+                        SaveDelimited(table, destination, delimiter, includeFileHeader);
+                        break;
+                    default:
+                        Dts.Events.FireWarning(0, String.Empty, &quot;Invalid Entity Type&quot;, String.Empty, 0);
+                        break;
+                }
+                Dts.Variables[&quot;User::ExitStatus&quot;].Value = 0;
+                SetFilename(CONNECTION_MANAGER_NAME, entityKey, Path.GetDirectoryName(destination));
+                Dts.TaskResult = (int)ScriptResults.Success;
+            }
+            catch (Exception ex)
+            {
+                Dts.Events.FireWarning(0, String.Empty, &quot;An error occurred processing Export {entityKey}, and it was not able to be generated. Error message: {ex.Message}&quot;, String.Empty, 0);
+                Dts.Variables[&quot;User::ExitStatus&quot;].Value = 1;
+                Dts.TaskResult = (int)ScriptResults.Success;
+            }
+        }
+
+        void DownloadReport(string url, string destination)
+        {
+            if (url == null) throw new ArgumentNullException(&quot;url&quot;);
+            if (destination == null) throw new ArgumentNullException(&quot;destination&quot;);
+
+            if (!Directory.Exists(Path.GetDirectoryName(destination)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(destination));
+            }
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.Timeout = TIMEOUT_HOUR;
+            request.ReadWriteTimeout = TIMEOUT_HOUR;
+            request.UseDefaultCredentials = true;
+            request.Headers.Add(HttpRequestHeader.AcceptLanguage, &quot;en-AU,en;q=0.9&quot;);
+
+            var response = (HttpWebResponse)request.GetResponse();
+
+            using (Stream file = File.OpenWrite(destination))
+            {
+                response.GetResponseStream().CopyTo(file);
+            }
+        }
+
+        DataTable FetchDataTable(string connectionManagerName, string command)
+        {
+            if (connectionManagerName == null) throw new ArgumentNullException(&quot;connectionManagerName&quot;);
+            if (command == null) throw new ArgumentNullException(&quot;command&quot;);
+
+            var connectionManager = Dts.Connections[connectionManagerName].AcquireConnection(Dts.Transaction);
+
+            var connection = connectionManager as SqlConnection;
+            try
+            {
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = command;
+                    cmd.CommandType = CommandType.Text;
+                    var table = new DataTable();
+                    table.Load(cmd.ExecuteReader());
+                    return table;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                Dts.Connections[connectionManagerName].ReleaseConnection(connection);
+            }
+        }
+
+        string FetchScalarAsString(string connectionManagerName, string command)
+        {
+            if (connectionManagerName == null) throw new ArgumentNullException(&quot;connectionManagerName&quot;);
+            if (command == null) throw new ArgumentNullException(&quot;command&quot;);
+
+            var connectionManager = Dts.Connections[connectionManagerName].AcquireConnection(Dts.Transaction);
+
+            var connection = connectionManager as SqlConnection;
+            try
+            {
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = command;
+                    cmd.CommandType = CommandType.Text;
+                    return cmd.ExecuteScalar() as string;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                Dts.Connections[connectionManagerName].ReleaseConnection(connection);
+            }
+        }
+
+        void SaveDelimited(DataTable table, string destination, char delimiter, bool includeFileHeader)
+        {
+            if (table.Columns.Count == 0)
+            {
+                /* Do not export data if column collection is empty */
+                Dts.Events.FireWarning(0, string.Empty, &quot;Table has no columns. No file is created.&quot;, string.Empty, 0);
+                return;
+            }
+
+            if (!Directory.Exists(Path.GetDirectoryName(destination)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(destination));
+            }
+
+            using (StreamWriter sw = File.CreateText(destination))
+            {
+                if (includeFileHeader)
+                {
+                    /* Write header row */
+                    for (int i = 0; i &lt; table.Columns.Count; i++)
+                    {
+                        char delimiterOrNewline = (i &lt; table.Columns.Count - 1 ? delimiter : sw.NewLine[0]);
+                        sw.Write(table.Columns[i].ColumnName);
+                        sw.Write(delimiterOrNewline);
+                    }
+                }
+
+                /* Write Data */
+                foreach (DataRow dr in table.Rows)
+                {
+                    for (int i = 0; i &lt; table.Columns.Count; i++)
+                    {
+                        char delimiterOrNewline = (i &lt; table.Columns.Count - 1 ? delimiter : sw.NewLine[0]);
+                        if (!Convert.IsDBNull(dr[i]))
+                        {
+                            var cellValue = SanitiseDelimitedCell(dr[i].ToString(), delimiter);
+                            sw.Write(cellValue);
+                        }
+                        sw.Write(delimiterOrNewline);
+                    }
+                }
+            }
+        }
+
+        void SaveXML(string text, string destination)
+        {
+            if (destination == null) throw new ArgumentNullException(&quot;destination&quot;);
+            if (text == null) throw new ArgumentNullException(&quot;text&quot;);
+
+            File.WriteAllText(destination, text);
+        }
+
+        void SetFilename(string connectionManagerName, int entityKey, string filename)
+        {
+            var connectionManager = Dts.Connections[connectionManagerName].AcquireConnection(Dts.Transaction);
+
+            var connection = connectionManager as SqlConnection;
+            try
+            {
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = &quot;UPDATE DataExport.Entity SET MostRecentFileLocation = @FileLocation WHERE EntityKey = @EntityKey&quot;;
+                    cmd.Parameters.AddWithValue(&quot;@FileLocation&quot;, filename);
+                    cmd.Parameters.AddWithValue(&quot;@EntityKey&quot;, entityKey);
+                    cmd.CommandType = CommandType.Text;
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                Dts.Connections[connectionManagerName].ReleaseConnection(connection);
+            }
+        }
+
+        /*
+         * Looks for predefined strings in the path and replaces it with a formatted timestamp
+         * Markers are CURRENT_TIMESTAMP (replaced with the current date and time) and DATA_DATE (replaced with the previous business day);
+         */
+        string ReplaceTimestamps(string absolutePath)
+        {
+            var now = DateTime.Now;
+            var replacements = new Dictionary&lt;string, DateTime&gt; { { &quot;CURRENT_TIMESTAMP&quot;, now }, { &quot;DATA_DATE&quot;, now.Date.AddDays(-1) }, { &quot;PREVIOUS_EOM&quot;, (new DateTime(now.Year, now.Month, 1)).AddDays(-1) } };
+
+            // invaluable - https://regex101.com
+            var regex = new Regex(&quot;{([^}].*?):([^}].*?)?}|{([^}].*?)}&quot;, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var result = regex.Replace(absolutePath, delegate (Match m) {
+                var key = m.Groups[1].Value != String.Empty ? m.Groups[1].Value : m.Groups[3].Value;
+                var fmt = m.Groups[2].Value != String.Empty ? m.Groups[2].Value : DEFAULT_DATE_FORMAT;
+
+                if (replacements.ContainsKey(key) == false) throw new InvalidOperationException(&quot;Cannot locate {key} in the parameter list&quot;);
+                return replacements[key].ToString(fmt);
+            });
+
+            return result;
+        }
+
+        string SanitiseFilename(string absolutePath)
+        {
+            var filename = Path.GetFileName(absolutePath);
+            var directory = Path.GetDirectoryName(absolutePath);
+
+            var sanitisedFilename = string.Join(&quot;_&quot;, filename.Split(Path.GetInvalidFileNameChars()));
+
+            return Path.Combine(directory, sanitisedFilename);
+        }
+
+        // Some guy on stack overflow says this always works.
+        public static string SanitiseDelimitedCell(string str, char delimiter)
+        {
+            bool mustQuote = (str.Contains(delimiter.ToString()) || str.Contains(&quot;\&quot;&quot;) || str.Contains(&quot;\r&quot;) || str.Contains(&quot;\n&quot;));
+            if (mustQuote)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append(&quot;\&quot;&quot;);
+                foreach (char nextChar in str)
+                {
+                    sb.Append(nextChar);
+                    if (nextChar == &apos;&quot;&apos;)
+                        sb.Append(&quot;\&quot;&quot;);
+                }
+                sb.Append(&quot;\&quot;&quot;);
+                return sb.ToString();
+            }
+
+            return str;
+        }
+
+        #region ScriptResults declaration
+        /// &lt;summary&gt;
+        /// This enum provides a convenient shorthand within the scope of this class for setting the
+        /// result of the script.
+        /// 
+        /// This code was generated automatically.
+        /// &lt;/summary&gt;
+        enum ScriptResults
+        {
+            Success = Microsoft.SqlServer.Dts.Runtime.DTSExecResult.Success,
+            Failure = Microsoft.SqlServer.Dts.Runtime.DTSExecResult.Failure
+        };
+        #endregion
+
+    }
+}</File>
+                <File Path="Properties\AssemblyInfo.cs">using System.Reflection;
+using System.Runtime.CompilerServices;
+
+//
+// General Information about an assembly is controlled through the following 
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+//
+[assembly: AssemblyTitle(&quot;ST_32cc1158d28c41d396a82f292ab5a74a&quot;)]
+[assembly: AssemblyDescription(&quot;&quot;)]
+[assembly: AssemblyConfiguration(&quot;&quot;)]
+[assembly: AssemblyCompany(&quot;Peoples Choice Credit Union&quot;)]
+[assembly: AssemblyProduct(&quot;ST_32cc1158d28c41d396a82f292ab5a74a&quot;)]
+[assembly: AssemblyCopyright(&quot;Copyright @ Peoples Choice Credit Union 2018&quot;)]
+[assembly: AssemblyTrademark(&quot;&quot;)]
+[assembly: AssemblyCulture(&quot;&quot;)]
+//
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version 
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Revision and Build Numbers 
+// by using the &apos;*&apos; as shown below:
+
+[assembly: AssemblyVersion(&quot;1.0.*&quot;)]</File>
+            </Files>
+            <ReadOnlyVariables>
+                <Variable VariableName="CommandToExecute" DataType="String" Namespace="User" />
+                <Variable VariableName="Delimiter" DataType="String" Namespace="User" />
+                <Variable VariableName="EntityKey" DataType="Int32" Namespace="User" />
+                <Variable VariableName="EntityTypeName" DataType="String" Namespace="User" />
+                <Variable VariableName="FileDestination" DataType="String" Namespace="User" />
+                <Variable VariableName="IncludeFileHeader" DataType="Boolean" Namespace="User" />
+            </ReadOnlyVariables>
+            <ReadWriteVariables>
+                <Variable VariableName="ExitStatus" DataType="Int32" Namespace="User" />
+            </ReadWriteVariables>
+        </ScriptTaskProject>
+    </ScriptProjects>        
+</Biml>

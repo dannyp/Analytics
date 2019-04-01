@@ -1,0 +1,20 @@
+﻿<#@ property name="PackageName" type="String" #>
+<Projects>
+    <PackageProject Name="Process">
+        <Packages>
+            <Package PackageName="<#=PackageName#>" />
+        </Packages>
+        <Parameters>
+            <Parameter Name="EtlDB_ConnectionString" DataType="String">Data Source=DevSqlOlap01\Olap2017;Initial Catalog=ETL;Provider=SQLNCLI11.1;Integrated Security=SSPI;Auto Translate=False;Application Name=Process.Parallel;</Parameter>
+            <Parameter Name="BIxPressDB_ConnectionString" DataType="String">Data Source=DevSqlOlap01\Olap2017;Initial Catalog=BIxPress;Provider=SQLNCLI11.1;Integrated Security=SSPI;Auto Translate=False;Application Name=Process.Parallel;</Parameter>
+        </Parameters>
+        <Connections>
+            <Connection ConnectionName="BIxPressDB" />
+            <Connection ConnectionName="EtlDB" />
+        </Connections>
+    </PackageProject>
+</Projects>
+<Connections>
+    <Connection Name="BIxPressDB" ConnectionString="Data Source=DevSqlOlap01\Olap2017;Initial Catalog=BIxPress;Provider=SQLNCLI11.1;Integrated Security=SSPI;Auto Translate=False;Application Name=Process.Parallel;" />
+    <Connection Name="EtlDB" ConnectionString="Data Source=DevSqlOlap01\Olap2017;Initial Catalog=ETL;Provider=SQLNCLI11.1;Integrated Security=SSPI;Auto Translate=False;Application Name=Process.Parallel;" />
+</Connections>

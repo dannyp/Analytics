@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<DTS:ConnectionManager xmlns:DTS="www.microsoft.com/SqlServer/Dts"
+  DTS:ObjectName="BIxPressDB"
+  DTS:DTSID="{6133DCA0-220F-46F3-8D30-CDBA51D976F1}"
+  DTS:CreationName="OLEDB">
+  <DTS:PropertyExpression
+    DTS:Name="ConnectionString">@[$Project::BIxPressDB_ConnectionString]</DTS:PropertyExpression>
+  <DTS:ObjectData>
+    <DTS:ConnectionManager
+      DTS:ConnectionString="Data Source=DevSqlOlap01\Olap2017;Initial Catalog=BIxPress;Provider=SQLNCLI11.1;Integrated Security=SSPI;Auto Translate=False;Application Name=Etl.DoStuff;" />
+  </DTS:ObjectData>
+</DTS:ConnectionManager>

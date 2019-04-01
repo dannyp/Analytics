@@ -1,0 +1,67 @@
+﻿<ExecuteSQL Name="Reset IsProcessing Flag" LoggingMode="Disabled" ConnectionName="EtlDB">
+    <PrecedenceConstraints>
+        <Inputs>
+            <Input OutputPathName="Main Flow.Output" />
+        </Inputs>
+    </PrecedenceConstraints>                    
+    <Parameters>
+        <Parameter Name="0" VariableName="EntityGroupKeyCommaSeparatedList" Length="-1" DataType="AnsiString" />
+    </Parameters>
+    <DirectInput>EXEC Process.up_ResetIsProcessingFlag ?, <#= processTypeKey #></DirectInput>
+</ExecuteSQL>
+    
+<ExecuteSQL Name="Cleanup Parallel Execution Control" ConnectionName="EtlDB">
+    <PrecedenceConstraints>
+        <Inputs>
+            <Input OutputPathName="Reset IsProcessing Flag.Output" />
+        </Inputs>
+    </PrecedenceConstraints>      
+    <Parameters>
+        <Parameter Name="0" VariableName="System.ExecutionInstanceGUID" Length="-1" DataType="AnsiString" />
+    </Parameters>
+    <DirectInput>DELETE Process.ParallelExecutionControl WHERE ExecutionInstanceGUID = ?</DirectInput>
+</ExecuteSQL>
+
+<Container Name="Reset Schedule if all done">
+    <PrecedenceConstraints>
+        <Inputs>
+            <Input OutputPathName="Cleanup Parallel Execution Control.Output" />
+        </Inputs>
+    </PrecedenceConstraints>
+    <Tasks>
+        <ExecuteSQL Name="Check if all entities have processed" LoggingMode="Disabled" ConnectionName="EtlDB" ResultSet="SingleRow">
+            <Results>
+                <Result Name="0" VariableName="User.CountOfEntitiesStillToProcess" />
+            </Results>
+            <Parameters>
+                <Parameter Name="@EntityGroupKeyCommaSeparatedList" VariableName="EntityGroupKeyCommaSeparatedList" Length="-1" DataType="AnsiString" />
+            </Parameters>
+            <DirectInput>EXEC Process.up_AreThereAnyEntitiesToProcess ?, <#= processTypeKey #></DirectInput>
+        </ExecuteSQL>
+        
+        <ExecuteSQL Name="Set Schedule Date to tomorrow" Disabled="true" ConnectionName="EtlDB">
+            <Expressions>
+                <Expression ExternalProperty="Disable">@[$Package::ScheduleName] == &quot;&quot;</Expression>
+            </Expressions>
+            <PrecedenceConstraints>
+                <Inputs>
+                    <Input OutputPathName="Check if all entities have processed.Output" EvaluationOperation="ExpressionAndConstraint" Expression="@[User::CountOfEntitiesStillToProcess] == 0" />
+                </Inputs>
+            </PrecedenceConstraints>
+            <VariableInput VariableName="User.SetScheduleDateSql" />
+        </ExecuteSQL>
+        
+        <ExecuteSQL Name="Set Ready Status" LoggingMode="Disabled" ConnectionName="EtlDB">
+            <PrecedenceConstraints>
+                <Inputs>
+                    <Input OutputPathName="Set Schedule Date to tomorrow.Output" EvaluationOperation="ExpressionAndConstraint" EvaluationValue="Completion" Expression="!ISNULL(@[$Package::EntityToSetForDataIsReady]) &amp;&amp; @[$Package::EntityToSetForDataIsReady] != &quot;&quot;" />
+                </Inputs>
+            </PrecedenceConstraints>
+            <Parameters>
+                <Parameter Name="@EntityCode" VariableName="EntityToSetForDataIsReady" Length="-1" DataType="AnsiString" />
+                <Parameter Name="@PackageExecutionID" VariableName="System.ExecutionInstanceGUID" Length="-1" DataType="AnsiString" />
+            </Parameters>
+            <DirectInput>EXEC Dependency.up_SetReadyStatus ?, ?</DirectInput>
+        </ExecuteSQL>
+    </Tasks>
+</Container>

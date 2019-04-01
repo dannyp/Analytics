@@ -1,0 +1,9 @@
+﻿<ExecuteSQL Name="Are there any entities to Process?" LoggingMode="Disabled" ConnectionName="EtlDB" ResultSet="SingleRow">
+    <Results>
+        <Result Name="0" VariableName="User.CountOfEntitiesStillToProcess" />
+    </Results>
+    <Parameters>
+        <Parameter Name="@EntityGroupKeyCommaSeparatedList" VariableName="EntityGroupKeyCommaSeparatedList" Length="-1" DataType="AnsiString" />
+    </Parameters>
+    <DirectInput>EXEC Process.up_AreThereAnyEntitiesToProcess ?, <#= processTypeKey #></DirectInput>
+</ExecuteSQL>
