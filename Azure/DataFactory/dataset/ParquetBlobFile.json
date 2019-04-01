@@ -1,0 +1,31 @@
+{
+	"name": "ParquetBlobFile",
+	"properties": {
+		"description": "File in Parquet format",
+		"linkedServiceName": {
+			"referenceName": "MicksBlobStorage",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Scope": {
+				"type": "String",
+				"defaultValue": "@pipeline().parameters.Scope"
+			}
+		},
+		"type": "AzureBlob",
+		"typeProperties": {
+			"format": {
+				"type": "ParquetFormat"
+			},
+			"fileName": {
+				"value": "@concat(item().EntityName, '.parquet')",
+				"type": "Expression"
+			},
+			"folderPath": {
+				"value": "@concat('/', dataset().Scope, '/', item().SourceSystem, '/', item().EntityName, '/Current')",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,25 @@
+{
+	"name": "EtlToProcess",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Etl",
+			"type": "LinkedServiceReference"
+		},
+		"type": "AzureSqlTable",
+		"structure": [
+			{
+				"name": "EtlKey",
+				"type": "Int32"
+			},
+			{
+				"name": "SqlToExecute",
+				"type": "String"
+			},
+			{
+				"name": "DestinationFilename",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

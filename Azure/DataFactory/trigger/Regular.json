@@ -1,0 +1,26 @@
+{
+	"name": "Regular",
+	"properties": {
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "Import Data to Blob Storage",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"Environment": "dev"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 1,
+				"startTime": "2018-12-18T08:45:00Z",
+				"timeZone": "UTC"
+			}
+		}
+	}
+}

@@ -1,0 +1,48 @@
+{
+	"name": "Process Changeset",
+	"properties": {
+		"description": "Import Changeset from Azure Blob storage into Staging table, then update Data Warehouse table.",
+		"activities": [
+			{
+				"name": "Import Changeset into Staging",
+				"description": "Import the Changeset from parquet format in Azure Blob storage into the Staging table.",
+				"type": "Copy",
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"source": {
+						"type": "BlobSource",
+						"recursive": true
+					},
+					"sink": {
+						"type": "SqlSink",
+						"writeBatchSize": 10000
+					},
+					"enableStaging": false,
+					"dataIntegrationUnits": 0
+				},
+				"inputs": [
+					{
+						"referenceName": "AzureBlob2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Environment": "dev"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AzureSqlTable2",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,274 @@
+{
+	"name": "Process Type 2 - Process History and Changeset",
+	"properties": {
+		"description": "Save the Current data into History folder and determine the Changeset (if applicable)\n\nUse a For Each loop operating in parallel mode.\n\nFor debugging purposes, you can simulate \n JSON array with:\n \n[{\"ProductNumber\" : \"HL-U509\"},{\"ProductNumber\" : \"FR-R92R-62\"}]",
+		"activities": [
+			{
+				"name": "Process Entity",
+				"description": "Process each individual Entity.",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Entities to process",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Entities to process').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Indicate Success",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "History and Changeset Processing",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"typeProperties": {
+								"storedProcedureName": "[Process].up_UpdateEntityDiagnostics",
+								"storedProcedureParameters": {
+									"EntityKey": {
+										"value": {
+											"value": "@item().EntityKey",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"ExecutionStartTime": {
+										"value": {
+											"value": "@activity('History and Changeset Processing').ExecutionStartTime",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
+									"Result": {
+										"value": "Success",
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "ControlDatabase",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Indicate Failure",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "History and Changeset Processing",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"typeProperties": {
+								"storedProcedureName": "[Process].up_UpdateEntityDiagnostics",
+								"storedProcedureParameters": {
+									"EntityKey": {
+										"value": {
+											"value": "@item().EntityKey",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"ExecutionStartTime": {
+										"value": {
+											"value": "@activity('History and Changeset Processing').ExecutionStartTime",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
+									"ExecutionMessage": {
+										"value": {
+											"value": "@concat('Error in Data Factory ''', pipeline().DataFactory, ''' | Pipeline  ''', pipeline().Pipeline, ''' | Entity \"', item().SourceSystem, '.', item().EntityName, '\" | Activity \"History and Changeset Processing\"')",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"Result": {
+										"value": "Failure",
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "ControlDatabase",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "History and Changeset Processing",
+							"description": "This Notebook will process each record and record History and, if required, determine the Changeset of this newly arriving data",
+							"type": "DatabricksNotebook",
+							"dependsOn": [
+								{
+									"activity": "Get Data Dates",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"typeProperties": {
+								"notebookPath": "/Users/mwood@peopleschoicecu.com.au/Import Parquet and Determine Changeset - New",
+								"baseParameters": {
+									"System": {
+										"value": "@item().SourceSystem",
+										"type": "Expression"
+									},
+									"Entity": {
+										"value": "@item().EntityName",
+										"type": "Expression"
+									},
+									"PrimaryKeyColumnList": {
+										"value": "@item().PrimaryKeyColumnList",
+										"type": "Expression"
+									},
+									"CurrentDataDate": {
+										"value": "@activity('Get Data Dates').output.firstRow.CurrentDataDate",
+										"type": "Expression"
+									},
+									"PreviousDataDate": {
+										"value": "@activity('Get Data Dates').output.firstRow.PreviousDataDate",
+										"type": "Expression"
+									},
+									"Scope": {
+										"value": "@pipeline().parameters.Scope",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "AzureDatabricks",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Get Data Dates",
+							"description": "Read Control Table to get Current and Previous Data Dates",
+							"type": "Lookup",
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"typeProperties": {
+								"source": {
+									"type": "SqlSource",
+									"sqlReaderStoredProcedureName": "[dbo].[up_GetDataDates]",
+									"storedProcedureParameters": {
+										"DatabaseEntityName": {
+											"type": "String",
+											"value": {
+												"value": "@concat(item().SourceSystem, '.', item().EntityName)",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								"dataset": {
+									"referenceName": "DateToProcessFor",
+									"type": "DatasetReference"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Get Entities to process",
+				"description": "Get the Entities to process in this pipeline.",
+				"type": "Lookup",
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"source": {
+						"type": "SqlSource",
+						"sqlReaderStoredProcedureName": "[Process].up_GetEntitiesToProcess",
+						"storedProcedureParameters": {
+							"EntityGroupKeyList": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.EntityGroupKeyList",
+									"type": "Expression"
+								}
+							},
+							"ProcessTypeKey": {
+								"type": "String",
+								"value": {
+									"value": "@variables('ProcessTypeKey')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					"dataset": {
+						"referenceName": "EntitiesToProcess",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			}
+		],
+		"parameters": {
+			"EntityGroupKeyList": {
+				"type": "String",
+				"defaultValue": "1"
+			},
+			"Scope": {
+				"type": "String",
+				"defaultValue": "dev"
+			}
+		},
+		"variables": {
+			"CurrentDataDate": {
+				"type": "String"
+			},
+			"ProcessTypeKey": {
+				"type": "String",
+				"defaultValue": "2"
+			},
+			"PreviousDataDate": {
+				"type": "String"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

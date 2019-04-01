@@ -1,0 +1,308 @@
+{
+	"name": "Import Source Data",
+	"properties": {
+		"description": "Import Source data into parquet files in Azure Blob Storage.\n\nUse a For Each loop in parallel.\n\nFor debugging purposes, use the following value for Values parameter (2 element array of a single item ProductNumber):\n\n[{\"ProductNumber\" : \"HL-U509\"},{\"ProductNumber\" : \"FR-R92R-62\"}]",
+		"activities": [
+			{
+				"name": "Process ELT",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Set To Iterate Over",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Set To Iterate Over').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Import Source Data",
+							"type": "Copy",
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"typeProperties": {
+								"source": {
+									"type": "SqlSource",
+									"sqlReaderQuery": {
+										"value": "@item().SqlToExecute",
+										"type": "Expression"
+									}
+								},
+								"sink": {
+									"type": "BlobSink"
+								},
+								"enableStaging": false,
+								"dataIntegrationUnits": 0
+							},
+							"inputs": [
+								{
+									"referenceName": "AzureSqlTable2",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "AzureBlob2",
+									"type": "DatasetReference",
+									"parameters": {
+										"Environment": {
+											"value": "@pipeline().parameters.Environment",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Indicate Success",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Import Source Data",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[up_EtlDiagnostics]",
+								"storedProcedureParameters": {
+									"DataMovementDurationInSeconds": {
+										"value": {
+											"value": "@activity('Import Source Data').output.copyDuration",
+											"type": "Expression"
+										},
+										"type": "Int16"
+									},
+									"EtlKey": {
+										"value": {
+											"value": "@item().EtlKey",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"ExecutionStartTime": {
+										"value": {
+											"value": "@utcnow(activity('Import Source Data').output.executionDetails[0].start)",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
+									"RowsRead": {
+										"value": {
+											"value": "@activity('Import Source Data').output.rowsRead",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"RowsWritten": {
+										"value": {
+											"value": "@activity('Import Source Data').output.rowsCopied",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"Result": {
+										"value": "Success",
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "Etl",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Indicate Failure",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Import Source Data",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[up_EtlDiagnostics]",
+								"storedProcedureParameters": {
+									"DataMovementDurationInSeconds": {
+										"value": {
+											"value": "@activity('Import Source Data').output.copyDuration",
+											"type": "Expression"
+										},
+										"type": "Int16"
+									},
+									"EtlKey": {
+										"value": {
+											"value": "@item().EtlKey",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"ExecutionStartTime": {
+										"value": {
+											"value": "@utcnow(activity('Import Source Data').output.executionDetails[0].start)",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
+									"Errors": {
+										"value": {
+											"value": "@concat('Error in Data Factory ''', pipeline().DataFactory, ''' | Pipeline  ''', pipeline().Pipeline, ''' | ', activity('Import Source Data').output.errors[0].Message)",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"Result": {
+										"value": "Failure",
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "Etl",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Notify Support 3",
+							"type": "WebActivity",
+							"dependsOn": [
+								{
+									"activity": "Import Source Data",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"typeProperties": {
+								"url": "https://prod-07.australiaeast.logic.azure.com:443/workflows/183eebc0d4634a449d8d8927448205e3/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=8jEZvQpykagriqd-6frbmJi35hMQYKxIv8XjHNLqtn4",
+								"method": "POST",
+								"headers": {
+									"Content-Type": "application/json"
+								},
+								"body": {
+									"DataFactoryName": "@{pipeline().DataFactory}",
+									"PipelineName": "@{pipeline().Pipeline}",
+									"ErrorMessage": "@activity('Import Source Data').error.message",
+									"EmailTo": "@pipeline().parameters.SupportEmail"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Get Set To Iterate Over",
+				"type": "Lookup",
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"source": {
+						"type": "SqlSource",
+						"sqlReaderStoredProcedureName": "[dbo].[GetEtlToProcess]",
+						"storedProcedureParameters": {
+							"EtlGroupKeyCommaSeparatedString": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.EtlGroupKeyCommaSeparatedString",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					"dataset": {
+						"referenceName": "EtlToProcess",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Notify Support 1",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "Get Set To Iterate Over",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"url": "https://prod-07.australiaeast.logic.azure.com:443/workflows/183eebc0d4634a449d8d8927448205e3/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=8jEZvQpykagriqd-6frbmJi35hMQYKxIv8XjHNLqtn4",
+					"method": "POST",
+					"headers": {
+						"Content-Type": "application/json"
+					},
+					"body": {
+						"DataFactoryName": "@{pipeline().DataFactory}",
+						"PipelineName": "@{pipeline().Pipeline}",
+						"ErrorMessage": "@activity('Get Set To Iterate Over').error.message",
+						"EmailTo": "@pipeline().parameters.SupportEmail"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"EtlGroupKeyCommaSeparatedString": {
+				"type": "String",
+				"defaultValue": "1"
+			},
+			"Environment": {
+				"type": "String",
+				"defaultValue": "dev"
+			},
+			"SupportEmail": {
+				"type": "String",
+				"defaultValue": "mwood@peopleschoicecu.com.au"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

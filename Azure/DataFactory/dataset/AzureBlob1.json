@@ -1,0 +1,34 @@
+{
+	"name": "AzureBlob1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Environment": {
+				"type": "String",
+				"defaultValue": "dev"
+			},
+			"Entity": {
+				"type": "String",
+				"defaultValue": "@pipeline().parameters.Entity"
+			}
+		},
+		"type": "AzureBlob",
+		"typeProperties": {
+			"format": {
+				"type": "ParquetFormat"
+			},
+			"fileName": {
+				"value": "@concat(dataset().Entity, '_', formatDateTime(utcnow(), 'yyyyMMdd'), '.parquet')",
+				"type": "Expression"
+			},
+			"folderPath": {
+				"value": "@dataset().Environment",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
